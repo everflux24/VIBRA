@@ -19,6 +19,14 @@ from collections import Counter
 # ==========================================
 # 定数
 # ==========================================
+
+# SVG data URI favicon（外部ファイル0依存）
+FAVICON_SVG = (
+    '<link rel="icon" type="image/svg+xml" '
+    'href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 '
+    'viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🔥%3C/text%3E%3C/svg%3E">'
+)
+
 GENERIC_WORDS = [
     "ファン", "声", "歓喜", "期待", "話題", "動画", "様子", "登場",
     "公開", "同士", "連発", "続出", "募集", "報告", "歓声", "熱狂",
