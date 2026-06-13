@@ -1,0 +1,54 @@
+name: Build & Deploy VIBRA
+
+on:
+  # 1時間ごとに自動再生成（トレンド更新）
+  schedule:
+    - cron: "0 * * * *"
+  # 手動実行
+  workflow_dispatch:
+  # main への push 時（[skip ci] でDB自動コミットによる無限ループを防止）
+  push:
+    branches: [main]
+
+# Pages デプロイに必要な権限
+permissions:
+  pages: write
+  id-token: write
+
+# Pages デプロイの同時実行を1本に制限
+concurrency:
+  group: vibra-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build site (Yahoo SSR JSON -> _site/index.html)
+        env:
+          VIBRA_OUTPUT_DIR: _site
+        run: python local_build.py
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
