@@ -390,6 +390,10 @@ def generate_app_html(slides, out_path=None):
         .ranking-text { font-weight: 700; }
         .ranking-posts { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.7); }
         .promo-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        /* Toast notification */
+        .vibra-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: #fff; font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 20px; backdrop-filter: blur(10px); z-index: 100; animation: toastIn 0.3s ease, toastOut 0.3s ease 1.5s forwards; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
     </style>
     """
 
@@ -414,37 +418,9 @@ def generate_app_html(slides, out_path=None):
         '<meta property="og:type" content="website">'
         + FAVICON_SVG +
         '<title>X（Twitter）トレンドまとめ｜VIBRA</title>' + css +
-        '</head><body><h1 class="visually-hidden">最新のトレンドまとめ</h1>'
+        '</head><body><h1 class="visually-hidden">今日の日本トレンドまとめ</h1>'
         '<main class="app-container">' + slides_html + '</main>'
-        '<script>'
-        '(function(){'
-        'var touchStartY=0,touchStartTime=0;'
-        'var container=document.querySelector(".app-container");'
-        'if(!container)return;'
-        'container.addEventListener("touchstart",function(e){'
-        'touchStartY=e.touches[0].clientY;'
-        'touchStartTime=Date.now();'
-        '},{passive:true});'
-        'container.addEventListener("touchend",function(e){'
-        'var dy=Math.abs(e.changedTouches[0].clientY-touchStartY);'
-        'var dt=Date.now()-touchStartTime;'
-        'if(dy<10 && dt<300){'
-        'var slide=e.target.closest(".slide");'
-        'if(slide){'
-        'var content=slide.querySelector(".content");'
-        'if(content)content.classList.toggle("hidden");'
-        '}'
-        '}'
-        '},{passive:true});'
-        'container.addEventListener("click",function(e){'
-        'var slide=e.target.closest(".slide");'
-        'if(slide){'
-        'var content=slide.querySelector(".content");'
-        'if(content)content.classList.toggle("hidden");'
-        '}'
-        '});'
-        '})();'
-        '</script>'
+        '<script>(function(){var touchStartY=0,touchStartTime=0;var lastTapTime=0;var longPressTimer=null;var container=document.querySelector(".app-container");if(!container)return;function getShareText(slide){var titleEl=slide.querySelector("h2.title");var metaEl=slide.querySelector(".meta span:last-child");var title=titleEl?titleEl.textContent.trim():"";var meta=metaEl?metaEl.textContent.trim():"";return "🔥 "+title+"\n"+meta+"\nhttps://vibra-reboot.github.io";}function copyToClipboard(text){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){showToast("コピーしました");}).catch(function(){fallbackCopy(text);});}else{fallbackCopy(text);}}function fallbackCopy(text){var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");showToast("コピーしました");}catch(e){showToast("コピーに失敗しました");}document.body.removeChild(ta);}function showToast(msg){var existing=document.querySelector(".vibra-toast");if(existing)existing.remove();var t=document.createElement("div");t.className="vibra-toast";t.textContent=msg;t.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:20px;backdrop-filter:blur(10px);z-index:100;animation:toastIn 0.3s ease,toastOut 0.3s ease 1.5s forwards;";document.body.appendChild(t);setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},2000);}container.addEventListener("touchstart",function(e){touchStartY=e.touches[0].clientY;touchStartTime=Date.now();var slide=e.target.closest(".slide");if(slide){longPressTimer=setTimeout(function(){copyToClipboard(getShareText(slide));longPressTimer=null;},600);}},{passive:true});container.addEventListener("touchmove",function(e){if(longPressTimer){var dy=Math.abs(e.touches[0].clientY-touchStartY);if(dy>10){clearTimeout(longPressTimer);longPressTimer=null;}}},{passive:true});container.addEventListener("touchend",function(e){if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}var dy=Math.abs(e.changedTouches[0].clientY-touchStartY);var dt=Date.now()-touchStartTime;if(dy<10 && dt<300){var now=Date.now();var slide=e.target.closest(".slide");if(!slide)return;if(now-lastTapTime<300){copyToClipboard(getShareText(slide));lastTapTime=0;}else{var content=slide.querySelector(".content");if(content)content.classList.toggle("hidden");lastTapTime=now;}}},{passive:true});container.addEventListener("click",function(e){var slide=e.target.closest(".slide");if(slide){var content=slide.querySelector(".content");if(content)content.classList.toggle("hidden");}});var style=document.createElement("style");style.textContent="@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}@keyframes toastOut{from{opacity:1;}to{opacity:0;}}";document.head.appendChild(style);})();</script>'
         '</body></html>'
     )
 
@@ -452,6 +428,38 @@ def generate_app_html(slides, out_path=None):
         f.write(full_html)
     print(f"✅ {out_path} を生成しました！（スライド数: {len(slides)}）")
     return out_path
+
+
+def generate_sitemap(base_url="https://vibra-reboot.github.io"):
+    """sitemap.xml を生成"""
+    jst = datetime.timezone(datetime.timedelta(hours=9))
+    now = datetime.datetime.now(jst)
+    lastmod = now.strftime("%Y-%m-%dT%H:%M:%S+09:00")
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>{base_url}/</loc>
+    <lastmod>{lastmod}</lastmod>
+    <changefreq>always</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>"""
+    sitemap_path = os.path.join(OUTPUT_DIR, "sitemap.xml")
+    with open(sitemap_path, "w", encoding="utf-8") as f:
+        f.write(xml)
+    print(f"✅ {sitemap_path} を生成しました")
+
+
+def generate_robots_txt(base_url="https://vibra-reboot.github.io"):
+    """robots.txt を生成"""
+    robots = f"""User-agent: *
+Allow: /
+
+Sitemap: {base_url}/sitemap.xml"""
+    robots_path = os.path.join(OUTPUT_DIR, "robots.txt")
+    with open(robots_path, "w", encoding="utf-8") as f:
+        f.write(robots)
+    print(f"✅ {robots_path} を生成しました")
 
 
 def _render_topic_slide(i, cluster, colors, time_str):
@@ -466,7 +474,7 @@ def _render_topic_slide(i, cluster, colors, time_str):
 
     if rep.get('image'):
         bg_html = (f'<img class="bg-img" src="{esc(rep["image"])}" alt="" '
-                   f'aria-hidden="true" loading="lazy" referrerpolicy="no-referrer">'
+                   f'aria-hidden="true" loading="lazy" decoding="async" referrerpolicy="no-referrer">'
                    f'<div class="bg-gradient" aria-hidden="true"></div>')
     else:
         bg_html = (f'<div class="bg-fallback" style="background: {bg_color};" aria-hidden="true"></div>'
@@ -686,6 +694,8 @@ def main():
     slides = inject_interruptions(slides)
 
     generate_app_html(slides)
+    generate_sitemap()
+    generate_robots_txt()
 
     new_count = sum(1 for c in clusters if c["heat_status"]["is_new"])
     surge_count = sum(1 for c in clusters if c["heat_status"]["status"] == "surge")
