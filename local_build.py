@@ -407,6 +407,7 @@ def generate_app_html(slides, out_path=None):
         .promo-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         /* Toast notification */
         .vibra-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: #fff; font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 20px; backdrop-filter: blur(10px); z-index: 100; animation: toastIn 0.3s ease, toastOut 0.3s ease 1.5s forwards; }
+        .disclaimer { position: absolute; bottom: 48px; right: 16px; font-size: 9px; color: rgba(255,255,255,0.22); text-align: right; line-height: 1.5; max-width: 240px; z-index: 20; letter-spacing: 0.3px; pointer-events: none; mix-blend-mode: luminosity; }
         @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
     </style>
@@ -537,6 +538,7 @@ def _render_topic_slide(i, cluster, colors, time_str):
             </footer>
             {related_html}
         </div>
+        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
@@ -578,6 +580,7 @@ def _render_ranking_slide(i, data):
             <h2 id="ranking-heading-{i}" class="interruption-title">{title}</h2>
             <ul class="ranking-list">{items_html}</ul>
         </div>
+        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
@@ -598,6 +601,7 @@ def _render_promo_slide(i, data):
             <p class="interruption-desc">{description}</p>
             <a href="{cta_url}" class="interruption-cta" target="_blank" rel="noopener noreferrer">{cta}</a>
         </div>
+        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
@@ -618,6 +622,7 @@ def _render_announcement_slide(i, data):
             <p class="interruption-desc">{description}</p>
             <a href="{cta_url}" class="interruption-cta" target="_blank" rel="noopener noreferrer">{cta}</a>
         </div>
+        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
