@@ -134,12 +134,16 @@ def should_merge(article, cluster):
         return False
     if a_core == c_core:
         return True
-    # 厳格化: 短いトークンの部分一致は禁止（誤マージ防止）
+    # 緩和: 4文字以上のトークン同士で部分一致を許可
     if a_core in c_core or c_core in a_core:
         if len(a_core) <= 3 or len(c_core) <= 3:
             return False
         return True
-    # 3文字部分一致ルールを廢止（誤マージの元凶）
+    # 3文字部分一致を復活（制限付き: 両方4文字以上の場合のみ）
+    if len(a_core) >= 4 and len(c_core) >= 4:
+        for i in range(len(a_core) - 2):
+            if a_core[i:i+3] in c_core:
+                return True
     if a_core in cluster.get('token_counter', {}):
         return True
     return False
@@ -483,10 +487,10 @@ def _render_topic_slide(i, cluster, colors, time_str):
     is_new = hs.get("is_new", False)
     new_tag = '<span class="new-tag">新着</span>' if is_new else ''
 
-    # 画像整合性チェック: 代表記事のcore_tokenがクラスターと一致しない場合は画像を信頼しない
+    # 画像整合性チェック: 代表記事のタイトルにクラスターのcore_tokenが含まれていれば画像を使用
     c_core = cluster.get('core_token', '')
-    rep_core = rep.get('core_token', '')
-    image_url = rep.get('image', '') if rep_core == c_core else ''
+    rep_title = rep.get('title', '')
+    image_url = rep.get('image', '') if c_core in rep_title else ''
 
     if image_url:
         bg_html = (f'<img class="bg-img" src="{esc(image_url)}" alt="" '
