@@ -538,7 +538,7 @@ def _render_topic_slide(i, cluster, colors, time_str):
             </footer>
             {related_html}
         </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があります。</div>
+        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約です。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
@@ -580,7 +580,7 @@ def _render_ranking_slide(i, data):
             <h2 id="ranking-heading-{i}" class="interruption-title">{title}</h2>
             <ul class="ranking-list">{items_html}</ul>
         </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があります。</div>
+        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約です。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
@@ -601,7 +601,7 @@ def _render_promo_slide(i, data):
             <p class="interruption-desc">{description}</p>
             <a href="{cta_url}" class="interruption-cta" target="_blank" rel="noopener noreferrer">{cta}</a>
         </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があります。</div>
+        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約です。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
@@ -622,7 +622,7 @@ def _render_announcement_slide(i, data):
             <p class="interruption-desc">{description}</p>
             <a href="{cta_url}" class="interruption-cta" target="_blank" rel="noopener noreferrer">{cta}</a>
         </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があります。</div>
+        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約です。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
