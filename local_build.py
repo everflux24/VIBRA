@@ -373,7 +373,7 @@ def generate_app_html(slides, out_path=None):
         .app-container { height: 100vh; width: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .app-container::-webkit-scrollbar { display: none; }
         .slide { height: 100vh; width: 100%; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: flex-end; padding: 28px 24px 80px; position: relative; overflow: hidden; }
-        .bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: -2; filter: brightness(0.7); background: #111; }
+        .bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; filter: brightness(0.7); }
         .bg-gradient { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.85) 80%, rgba(0,0,0,0.95) 100%); }
         .bg-fallback { position: absolute; inset: 0; z-index: -2; filter: blur(60px); opacity: 0.6; }
         .content { z-index: 10; max-width: 100%; transition: opacity 0.35s ease; }
@@ -407,7 +407,6 @@ def generate_app_html(slides, out_path=None):
         .promo-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         /* Toast notification */
         .vibra-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: #fff; font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 20px; backdrop-filter: blur(10px); z-index: 100; animation: toastIn 0.3s ease, toastOut 0.3s ease 1.5s forwards; }
-        .disclaimer { position: absolute; bottom: 48px; right: 16px; font-size: 9px; color: rgba(255,255,255,0.22); text-align: right; line-height: 1.5; max-width: 240px; z-index: 20; letter-spacing: 0.3px; pointer-events: none; mix-blend-mode: luminosity; }
         @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
     </style>
@@ -538,7 +537,6 @@ def _render_topic_slide(i, cluster, colors, time_str):
             </footer>
             {related_html}
         </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
@@ -580,7 +578,6 @@ def _render_ranking_slide(i, data):
             <h2 id="ranking-heading-{i}" class="interruption-title">{title}</h2>
             <ul class="ranking-list">{items_html}</ul>
         </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
@@ -601,7 +598,6 @@ def _render_promo_slide(i, data):
             <p class="interruption-desc">{description}</p>
             <a href="{cta_url}" class="interruption-cta" target="_blank" rel="noopener noreferrer">{cta}</a>
         </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
@@ -622,7 +618,6 @@ def _render_announcement_slide(i, data):
             <p class="interruption-desc">{description}</p>
             <a href="{cta_url}" class="interruption-cta" target="_blank" rel="noopener noreferrer">{cta}</a>
         </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
@@ -717,6 +712,16 @@ def main():
 
     slides = build_slides(clusters)
     slides = inject_interruptions(slides)
+
+    # OGP画像を出力ディレクトリにコピー
+    ogp_src = os.path.join(os.path.dirname(__file__), "ogp-default.png")
+    ogp_dst = os.path.join(OUTPUT_DIR, "ogp-default.png")
+    if os.path.exists(ogp_src):
+        import shutil
+        shutil.copy2(ogp_src, ogp_dst)
+        print(f"✅ {ogp_src} → {ogp_dst} をコピーしました")
+    else:
+        print(f"⚠️ OGP画像が見つかりません: {ogp_src}")
 
     generate_app_html(slides)
     generate_sitemap()
