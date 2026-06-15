@@ -65,6 +65,14 @@ def parse_posts(post_str):
         return 0
 
 
+def build_slides(clusters):
+    return [Slide("topic", cluster) for cluster in clusters]
+
+
+def inject_interruptions(slides):
+    return slides
+
+
 META_PATH = os.path.join(os.environ.get("VIBRA_OUTPUT_DIR", "."), "build_meta.json")
 
 def load_prev_meta():
