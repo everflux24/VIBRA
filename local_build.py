@@ -283,7 +283,7 @@ def generate_app_html(slides, out_path=None):
     full_html = (
         f'<!DOCTYPE html><!-- VIBRA_BUILD: {build_timestamp} --><html lang="ja"><head><meta charset="UTF-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">'
-        '<meta name="theme-color" content="#000000"><meta name="google-site-verification" content="teiftQqNINv-6xUwSh2bHx9fYM2_XtNd3yhuS0e1kNQ"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta http-equiv="refresh" content="600"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">'
+        '<meta name="theme-color" content="#000000"><meta name="google-site-verification" content="teiftQqNINv-6xUwSh2bHx9fYM2_XtNd3yhuS0e1kNQ"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta http-equiv="refresh" content="1800">'
         '<meta name="description" content="X（Twitter）の最新話題を10分ごとに自動更新。'
         'TikTok風の縦スワイプUIで、ニュースやSNSの流行をすばやくチェックできます。">'
         '<meta property="og:title" content="X（Twitter）トレンドまとめ｜VIBRA">'
