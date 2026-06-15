@@ -425,8 +425,8 @@ def generate_app_html(slides, out_path=None):
 
     full_html = (
         f'<!DOCTYPE html><!-- VIBRA_BUILD: {build_timestamp} --><html lang="ja"><head><meta charset="UTF-8">'
-        '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">'
-        '<meta name="theme-color" content="#000000"><meta name="google-site-verification" content="teiftQqNINv-6xUwSh2bHx9fYM2_XtNd3yhuS0e1kNQ"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">'
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"><meta http-equiv="refresh" content="600">'
+        '<meta name="theme-color" content="#000000"><meta name="google-site-verification" content="teiftQqNINv-6xUwSh2bHx9fYM2_XtNd3yhuS0e1kNQ"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta http-equiv="refresh" content="600"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">'
         '<meta name="description" content="X（Twitter）の最新話題を10分ごとに自動更新。'
         'TikTok風の縦スワイプUIで、ニュースやSNSの流行をすばやくチェックできます。">'
         '<meta property="og:title" content="X（Twitter）トレンドまとめ｜VIBRA">'
@@ -434,8 +434,22 @@ def generate_app_html(slides, out_path=None):
         'TikTok風の縦スワイプUIで、ニュースやSNSの流行をすばやくチェックできます。">'
         '<meta property="og:type" content="website"><meta property="og:url" content="https://everflux24.github.io/VIBRA/"><meta property="og:image" content="https://everflux24.github.io/VIBRA/ogp-default.png?v={version}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">'
         + FAVICON_SVG +
+        '<script>(function(){'
+        'var bt="{build_timestamp}";'
+        'var st=sessionStorage.getItem("vibra_bt");'
+        'var c=document.querySelector(".app-container");'
+        'if(st&&st!==bt){sessionStorage.removeItem("vibra_scroll");}'
+        'sessionStorage.setItem("vibra_bt",bt);'
+        'window.addEventListener("beforeunload",function(){'
+        'if(c)sessionStorage.setItem("vibra_scroll",c.scrollTop);'
+        '});'
+        'window.addEventListener("load",function(){'
+        'var s=sessionStorage.getItem("vibra_scroll");'
+        'if(s&&c){c.scrollTop=parseInt(s);sessionStorage.removeItem("vibra_scroll");}'
+        '});'
+        '})();</script>'
         '<title>X（Twitter）トレンドまとめ｜VIBRA</title>' + css +
-        
+        '<script>(function(){var bt="{build_timestamp}";var st=localStorage.getItem("vibra_bt");if(st&&st!==bt){location.reload(true);return;}localStorage.setItem("vibra_bt",bt);setInterval(function(){fetch(location.href,{cache:"no-store",method:"HEAD"}).then(function(r){var lm=r.headers.get("last-modified");if(lm&&lm.indexOf(bt.split(" ")[0])===-1){location.reload(true);}}).catch(function(){});},60000);})();</script>' +
         
         '</head><body><h1 class="visually-hidden">今日の日本トレンドまとめ</h1>'
         '<main class="app-container">' + slides_html + '</main>'
