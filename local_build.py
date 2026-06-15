@@ -282,10 +282,10 @@ def generate_app_html(slides, out_path=None):
         f'<!DOCTYPE html><!-- VIBRA_BUILD: {build_timestamp} --><html lang="ja"><head><meta charset="UTF-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">'
         '<meta name="theme-color" content="#000000"><meta name="google-site-verification" content="teiftQqNINv-6xUwSh2bHx9fYM2_XtNd3yhuS0e1kNQ"><meta http-equiv="refresh" content="1800">'
-        '<meta name="description" content="X（Twitter）の最新話題を10分ごとに自動更新。'
+        '<meta name="description" content="X（Twitter）の最新話題を30分ごとに自動更新。'
         'TikTok風の縦スワイプUIで、ニュースやSNSの流行をすばやくチェックできます。">'
         '<meta property="og:title" content="X（Twitter）トレンドまとめ｜VIBRA">'
-        '<meta property="og:description" content="X（Twitter）の最新話題を10分ごとに自動更新。'
+        '<meta property="og:description" content="X（Twitter）の最新話題を30分ごとに自動更新。'
         'TikTok風の縦スワイプUIで、ニュースやSNSの流行をすばやくチェックできます。">'
         '<meta property="og:type" content="website"><meta property="og:url" content="https://everflux24.github.io/VIBRA/"><meta property="og:image" content="https://everflux24.github.io/VIBRA/ogp-default.png?v={version}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">'
         + FAVICON_SVG +
@@ -395,7 +395,7 @@ def _render_topic_slide(i, cluster, colors, time_str):
             </footer>
             {related_html}
         </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
+        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。背景ミスマッチ、原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
         <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
     </article>
     """
