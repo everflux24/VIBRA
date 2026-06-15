@@ -263,8 +263,6 @@ def generate_app_html(slides, out_path=None):
         .ranking-text { font-weight: 700; }
         .ranking-posts { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.7); }
         .promo-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        /* Toast notification */
-        .vibra-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: #fff; font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 20px; backdrop-filter: blur(10px); z-index: 100; animation: toastIn 0.3s ease, toastOut 0.3s ease 1.5s forwards; }
         .disclaimer { position: absolute; bottom: 48px; right: 16px; font-size: 9px; color: rgba(255,255,255,0.22); text-align: right; line-height: 1.5; max-width: 240px; z-index: 20; letter-spacing: 0.3px; pointer-events: none; mix-blend-mode: luminosity; }
         @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
@@ -283,7 +281,7 @@ def generate_app_html(slides, out_path=None):
     full_html = (
         f'<!DOCTYPE html><!-- VIBRA_BUILD: {build_timestamp} --><html lang="ja"><head><meta charset="UTF-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">'
-        '<meta name="theme-color" content="#000000"><meta name="google-site-verification" content="teiftQqNINv-6xUwSh2bHx9fYM2_XtNd3yhuS0e1kNQ"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta http-equiv="refresh" content="1800">'
+        '<meta name="theme-color" content="#000000"><meta name="google-site-verification" content="teiftQqNINv-6xUwSh2bHx9fYM2_XtNd3yhuS0e1kNQ"><meta http-equiv="refresh" content="1800">'
         '<meta name="description" content="X（Twitter）の最新話題を10分ごとに自動更新。'
         'TikTok風の縦スワイプUIで、ニュースやSNSの流行をすばやくチェックできます。">'
         '<meta property="og:title" content="X（Twitter）トレンドまとめ｜VIBRA">'
@@ -296,7 +294,6 @@ def generate_app_html(slides, out_path=None):
         
         '</head><body><h1 class="visually-hidden">今日の日本トレンドまとめ</h1>'
         '<main class="app-container">' + slides_html + '</main>'
-        '<script>(function(){var bt="{build_timestamp}";var st=localStorage.getItem("vibra_bt");if(st&&st!==bt){var url=location.href.split("?")[0];location.replace(url+"?_="+Date.now());return;}localStorage.setItem("vibra_bt",bt);setInterval(function(){fetch(location.href,{cache:"no-store",method:"HEAD"}).then(function(r){var lm=r.headers.get("last-modified");if(lm&&lm.indexOf(bt.split(" ")[0])===-1){var existing=document.querySelector(".vibra-toast");if(existing)existing.remove();var t=document.createElement("div");t.className="vibra-toast";t.innerHTML="<span>🆕 新しい記事があります</span><button style=\"margin-left:10px;padding:4px 12px;background:#fff;color:#000;border:none;border-radius:12px;font-weight:700;cursor:pointer;\" onclick=\"location.replace(location.href.split(\'?\')[0]+\'?_=\'+Date.now())\">更新</button>";t.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:20px;backdrop-filter:blur(10px);z-index:100;animation:toastIn 0.3s ease;white-space:nowrap;";document.body.appendChild(t);}}).catch(function(){});},300000);})();</script>'
         '</body></html>'
     )
 
