@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-VIBRA_REBOOT v2.1 - CoreToken Architecture + Interruption Layer + Heat Delta
+VIBRA_REBOOT v2.2 - CoreToken Architecture + Interruption Layer + Heat Delta
+                      + SEO Structured Data (<time datetime>, JSON-LD, OGP fix)
 ==========================================================================
 「話題のTikTok」として設計されたトレンドまとめエンジン
 """
@@ -207,7 +208,51 @@ def compute_heat_status(cluster, prev_map):
 
 
 # ==========================================
-# 9. HTML生成
+# 9. JSON-LD 生成（SEO構造化データ）
+# ==========================================
+
+def generate_json_ld(slides, iso_time, page_title, page_desc):
+    """Schema.org ItemList + NewsArticle を生成"""
+    item_list = []
+    position = 1
+    for slide in slides:
+        if slide.type != "topic":
+            continue
+        cluster = slide.data
+        rep = cluster.get("rep", {})
+        title = rep.get("title", "")
+        summary = rep.get("summary", "")
+        # description は150文字に制限
+        desc = summary[:150] + "..." if len(summary) > 150 else summary
+        if not title:
+            continue
+        item_list.append({
+            "@type": "ListItem",
+            "position": position,
+            "item": {
+                "@type": "NewsArticle",
+                "headline": title,
+                "description": desc,
+                "datePublished": iso_time,
+                "dateModified": iso_time,
+                "url": "https://everflux24.github.io/VIBRA/"
+            }
+        })
+        position += 1
+
+    data = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": page_title,
+        "description": page_desc,
+        "dateModified": iso_time,
+        "itemListElement": item_list
+    }
+    return json.dumps(data, ensure_ascii=False, indent=2)
+
+
+# ==========================================
+# 10. HTML生成
 # ==========================================
 
 def esc(text):
@@ -222,6 +267,16 @@ def generate_app_html(slides, out_path=None):
     build_timestamp = now.strftime('%Y-%m-%d %H:%M JST')
     version = now.strftime('%Y%m%d_%H%M')
     time_str = now.strftime("%H:%M")
+    iso_time = now.isoformat()  # 2026-06-16T05:30:00+09:00
+
+    # OGP画像URLを確実に構築
+    ogp_image_url = f"https://everflux24.github.io/VIBRA/ogp-default.png?v={version}"
+
+    page_title = "X（Twitter）トレンドまとめ｜VIBRA"
+    page_desc = "X（Twitter）の最新話題を30分ごとに自動更新。TikTok風の縦スワイプUIで、ニュースやSNSの流行をすばやくチェックできます。"
+
+    # JSON-LD 生成
+    json_ld = generate_json_ld(slides, iso_time, page_title, page_desc)
 
     css = """
     <style>
@@ -274,7 +329,7 @@ def generate_app_html(slides, out_path=None):
 
     for i, slide in enumerate(slides):
         if slide.type == "topic":
-            slides_html += _render_topic_slide(i, slide.data, colors, time_str)
+            slides_html += _render_topic_slide(i, slide.data, colors, time_str, iso_time)
         elif slide.type == "interruption":
             slides_html += _render_interruption_slide(i, slide.data)
 
@@ -282,16 +337,14 @@ def generate_app_html(slides, out_path=None):
         f'<!DOCTYPE html><!-- VIBRA_BUILD: {build_timestamp} --><html lang="ja"><head><meta charset="UTF-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">'
         '<meta name="theme-color" content="#000000"><meta name="google-site-verification" content="teiftQqNINv-6xUwSh2bHx9fYM2_XtNd3yhuS0e1kNQ"><meta http-equiv="refresh" content="1800">'
-        '<meta name="description" content="X（Twitter）の最新話題を30分ごとに自動更新。'
-        'TikTok風の縦スワイプUIで、ニュースやSNSの流行をすばやくチェックできます。">'
-        '<meta property="og:title" content="X（Twitter）トレンドまとめ｜VIBRA">'
-        '<meta property="og:description" content="X（Twitter）の最新話題を30分ごとに自動更新。'
-        'TikTok風の縦スワイプUIで、ニュースやSNSの流行をすばやくチェックできます。">'
-        '<meta property="og:type" content="website"><meta property="og:url" content="https://everflux24.github.io/VIBRA/"><meta property="og:image" content="https://everflux24.github.io/VIBRA/ogp-default.png?v={version}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">'
+        f'<meta name="description" content="{esc(page_desc)}">'
+        f'<meta property="og:title" content="{esc(page_title)}">'
+        f'<meta property="og:description" content="{esc(page_desc)}">'
+        '<meta property="og:type" content="website"><meta property="og:url" content="https://everflux24.github.io/VIBRA/">'
+        f'<meta property="og:image" content="{esc(ogp_image_url)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">'
         + FAVICON_SVG +
-        '<title>X（Twitter）トレンドまとめ｜VIBRA</title>' + css +
-        
-        
+        f'<title>{esc(page_title)}</title>' + css +
+        f'<script type="application/ld+json">{json_ld}</script>' +
         '</head><body><h1 class="visually-hidden">今日の日本トレンドまとめ</h1>'
         '<main class="app-container">' + slides_html + '</main>'
         '</body></html>'
@@ -335,7 +388,7 @@ Sitemap: {base_url}/sitemap.xml"""
     print(f"✅ {robots_path} を生成しました")
 
 
-def _render_topic_slide(i, cluster, colors, time_str):
+def _render_topic_slide(i, cluster, colors, time_str, iso_time):
     rep = cluster['rep']
     bg_color = colors[i % len(colors)]
     hook_text = generate_hook(cluster['core_token'], rep['title'])
@@ -384,7 +437,7 @@ def _render_topic_slide(i, cluster, colors, time_str):
     return f"""
     <article class="slide" aria-labelledby="heading-{i}">
         {bg_html}
-        <span class="update-badge">🔄 {esc(time_str)} 更新</span>
+        <time datetime="{esc(iso_time)}" class="update-badge">🔄 {esc(time_str)} 更新</time>
         <div class="content">
             <span class="hook-badge" role="text" style="background: {badge_color};">{esc(hook_text)}</span>
             <h2 id="heading-{i}" class="title">{esc(rep['title'])}</h2>
@@ -486,7 +539,7 @@ def _render_announcement_slide(i, data):
 
 
 # ==========================================
-# 10. データ取得
+# 11. データ取得
 # ==========================================
 
 TARGET_URL = "https://search.yahoo.co.jp/realtime/search/matome"
@@ -550,7 +603,7 @@ def parse_html(html):
 
 
 # ==========================================
-# 11. メイン実行
+# 12. メイン実行
 # ==========================================
 
 def main():
@@ -592,7 +645,8 @@ def main():
 
     new_count = sum(1 for c in clusters if c["heat_status"]["is_new"])
     surge_count = sum(1 for c in clusters if c["heat_status"]["status"] == "surge")
-    print(f"\nVIBRA_REBOOT v2.1 ビルド完了")
+    print(f"
+VIBRA_REBOOT v2.2 ビルド完了")
     print(f"  クラスタ数: {len(clusters)}")
     print(f"  新着: {new_count} | 急上昇: {surge_count}")
     print(f"  総スライド数: {len(slides)}")
