@@ -4,7 +4,6 @@
 VIBRA_REBOOT v2.2 - CoreToken Architecture + Interruption Layer + Heat Delta
                       + SEO Structured Data (<time datetime>, JSON-LD, OGP fix)
 ==========================================================================
-「話題のTikTok」として設計されたトレンドまとめエンジン
 """
 
 import re
@@ -16,10 +15,6 @@ import sys
 import urllib.request
 import datetime
 from collections import Counter
-
-# ==========================================
-# コアロジックのインポート（Secretsから再構成されたファイル）
-# ==========================================
 
 try:
     from core.token_cluster import (
@@ -37,20 +32,12 @@ except ImportError:
     sys.exit(1)
 
 
-# ==========================================
-# 定数
-# ==========================================
-
-# SVG data URI favicon（外部ファイル0依存）
 FAVICON_SVG = (
     '<link rel="icon" type="image/svg+xml" '
     'href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 '
     'viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🔥%3C/text%3E%3C/svg%3E">'
 )
 
-# ==========================================
-# Slide 型定義
-# ==========================================
 
 class Slide:
     __slots__ = ("type", "data")
@@ -63,10 +50,6 @@ class Slide:
         return {"type": self.type, "data": self.data}
 
 
-# ==========================================
-# 1. データ前処理
-# ==========================================
-
 def parse_posts(post_str):
     if isinstance(post_str, int):
         return post_str
@@ -78,66 +61,6 @@ def parse_posts(post_str):
     except:
         return 0
 
-
-# ==========================================
-# 2. CoreToken 抽出
-# ==========================================
-
-
-
-# ==========================================
-# 3. クラスタリング
-# ==========================================
-
-    if a_core == c_core:
-        return True
-    # 緩和: 4文字以上のトークン同士で部分一致を許可
-    if a_core in c_core or c_core in a_core:
-        if len(a_core) <= 3 or len(c_core) <= 3:
-            return False
-        return True
-    # 3文字部分一致を復活（制限付き: 両方4文字以上の場合のみ）
-    if len(a_core) >= 4 and len(c_core) >= 4:
-        for i in range(len(a_core) - 2):
-            if a_core[i:i+3] in c_core:
-                return True
-    if a_core in cluster.get('token_counter', {}):
-        return True
-    return False
-
-
-# ==========================================
-# 4. 代表記事選定
-# ==========================================
-
-
-
-# ==========================================
-# 5. Hook生成
-# ==========================================
-
-
-# ==========================================
-# 6. 関連理由抽出
-# ==========================================
-
-
-
-# ==========================================
-# 7. Slide ビルド
-# ==========================================
-
-def build_slides(clusters):
-    return [Slide("topic", cluster) for cluster in clusters]
-
-
-def inject_interruptions(slides):
-    return slides
-
-
-# ==========================================
-# 8. 前回ビルドデータ管理（キャッシュ）
-# ==========================================
 
 META_PATH = os.path.join(os.environ.get("VIBRA_OUTPUT_DIR", "."), "build_meta.json")
 
@@ -160,7 +83,6 @@ def save_meta(clusters):
             for c in clusters
         ]
     }
-    # 修正: ディレクトリが存在しない場合は作成（初回保存時のエラー防止）
     meta_dir = os.path.dirname(META_PATH)
     if meta_dir and not os.path.exists(meta_dir):
         os.makedirs(meta_dir, exist_ok=True)
@@ -207,10 +129,6 @@ def compute_heat_status(cluster, prev_map):
     }
 
 
-# ==========================================
-# 9. JSON-LD 生成（SEO構造化データ）
-# ==========================================
-
 def generate_json_ld(slides, iso_time, page_title, page_desc):
     """Schema.org ItemList + NewsArticle を生成"""
     item_list = []
@@ -222,7 +140,6 @@ def generate_json_ld(slides, iso_time, page_title, page_desc):
         rep = cluster.get("rep", {})
         title = rep.get("title", "")
         summary = rep.get("summary", "")
-        # description は150文字に制限
         desc = summary[:150] + "..." if len(summary) > 150 else summary
         if not title:
             continue
@@ -251,12 +168,9 @@ def generate_json_ld(slides, iso_time, page_title, page_desc):
     return json.dumps(data, ensure_ascii=False, indent=2)
 
 
-# ==========================================
-# 10. HTML生成
-# ==========================================
-
 def esc(text):
     return html_lib.escape(str(text), quote=True)
+
 
 def generate_app_html(slides, out_path=None):
     if out_path is None:
@@ -267,15 +181,13 @@ def generate_app_html(slides, out_path=None):
     build_timestamp = now.strftime('%Y-%m-%d %H:%M JST')
     version = now.strftime('%Y%m%d_%H%M')
     time_str = now.strftime("%H:%M")
-    iso_time = now.isoformat()  # 2026-06-16T05:30:00+09:00
+    iso_time = now.isoformat()
 
-    # OGP画像URLを確実に構築
     ogp_image_url = f"https://everflux24.github.io/VIBRA/ogp-default.png?v={version}"
 
     page_title = "X（Twitter）トレンドまとめ｜VIBRA"
     page_desc = "X（Twitter）の最新話題を30分ごとに自動更新。TikTok風の縦スワイプUIで、ニュースやSNSの流行をすばやくチェックできます。"
 
-    # JSON-LD 生成
     json_ld = generate_json_ld(slides, iso_time, page_title, page_desc)
 
     css = """
@@ -333,22 +245,23 @@ def generate_app_html(slides, out_path=None):
         elif slide.type == "interruption":
             slides_html += _render_interruption_slide(i, slide.data)
 
-    full_html = (
-        f'<!DOCTYPE html><!-- VIBRA_BUILD: {build_timestamp} --><html lang="ja"><head><meta charset="UTF-8">'
-        '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">'
-        '<meta name="theme-color" content="#000000"><meta name="google-site-verification" content="teiftQqNINv-6xUwSh2bHx9fYM2_XtNd3yhuS0e1kNQ"><meta http-equiv="refresh" content="1800">'
-        f'<meta name="description" content="{esc(page_desc)}">'
-        f'<meta property="og:title" content="{esc(page_title)}">'
-        f'<meta property="og:description" content="{esc(page_desc)}">'
-        '<meta property="og:type" content="website"><meta property="og:url" content="https://everflux24.github.io/VIBRA/">'
-        f'<meta property="og:image" content="{esc(ogp_image_url)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">'
-        + FAVICON_SVG +
-        f'<title>{esc(page_title)}</title>' + css +
-        f'<script type="application/ld+json">{json_ld}</script>' +
-        '</head><body><h1 class="visually-hidden">今日の日本トレンドまとめ</h1>'
-        '<main class="app-container">' + slides_html + '</main>'
-        '</body></html>'
-    )
+    # HTML構築 - 各行を個別の文字列結合で改行を避ける
+    head_part1 = '<!DOCTYPE html><!-- VIBRA_BUILD: ' + build_timestamp + ' --><html lang="ja"><head><meta charset="UTF-8">'
+    head_part2 = '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">'
+    head_part3 = '<meta name="theme-color" content="#000000"><meta name="google-site-verification" content="teiftQqNINv-6xUwSh2bHx9fYM2_XtNd3yhuS0e1kNQ"><meta http-equiv="refresh" content="1800">'
+    head_part4 = '<meta name="description" content="' + esc(page_desc) + '">'
+    head_part5 = '<meta property="og:title" content="' + esc(page_title) + '">'
+    head_part6 = '<meta property="og:description" content="' + esc(page_desc) + '">'
+    head_part7 = '<meta property="og:type" content="website"><meta property="og:url" content="https://everflux24.github.io/VIBRA/">'
+    head_part8 = '<meta property="og:image" content="' + esc(ogp_image_url) + '"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">'
+    head_part9 = FAVICON_SVG
+    head_part10 = '<title>' + esc(page_title) + '</title>' + css
+    head_part11 = '<script type="application/ld+json">' + json_ld + '</script>'
+    head_part12 = '</head><body><h1 class="visually-hidden">今日の日本トレンドまとめ</h1>'
+    head_part13 = '<main class="app-container">' + slides_html + '</main>'
+    head_part14 = '</body></html>'
+
+    full_html = head_part1 + head_part2 + head_part3 + head_part4 + head_part5 + head_part6 + head_part7 + head_part8 + head_part9 + head_part10 + head_part11 + head_part12 + head_part13 + head_part14
 
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(full_html)
@@ -357,15 +270,14 @@ def generate_app_html(slides, out_path=None):
 
 
 def generate_sitemap(base_url="https://everflux24.github.io/VIBRA"):
-    """sitemap.xml を生成"""
     jst = datetime.timezone(datetime.timedelta(hours=9))
     now = datetime.datetime.now(jst)
     lastmod = now.strftime("%Y-%m-%dT%H:%M:%S+09:00")
-    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>{base_url}/</loc>
-    <lastmod>{lastmod}</lastmod>
+    <loc>""" + base_url + """/</loc>
+    <lastmod>""" + lastmod + """</lastmod>
     <changefreq>always</changefreq>
     <priority>1.0</priority>
   </url>
@@ -377,11 +289,10 @@ def generate_sitemap(base_url="https://everflux24.github.io/VIBRA"):
 
 
 def generate_robots_txt(base_url="https://everflux24.github.io/VIBRA"):
-    """robots.txt を生成"""
-    robots = f"""User-agent: *
+    robots = "User-agent: *
 Allow: /
 
-Sitemap: {base_url}/sitemap.xml"""
+Sitemap: " + base_url + "/sitemap.xml"
     robots_path = os.path.join(OUTPUT_DIR, "robots.txt")
     with open(robots_path, "w", encoding="utf-8") as f:
         f.write(robots)
@@ -398,18 +309,17 @@ def _render_topic_slide(i, cluster, colors, time_str, iso_time):
     is_new = hs.get("is_new", False)
     new_tag = '<span class="new-tag">新着</span>' if is_new else ''
 
-    # 画像整合性チェック: 代表記事のタイトルにクラスターのcore_tokenが含まれていれば画像を使用
     c_core = cluster.get('core_token', '')
     rep_title = rep.get('title', '')
     image_url = rep.get('image', '') if c_core in rep_title else ''
 
     if image_url:
-        bg_html = (f'<img class="bg-img" src="{esc(image_url)}" alt="" '
-                   f'aria-hidden="true" loading="lazy" decoding="async" referrerpolicy="no-referrer">'
-                   f'<div class="bg-gradient" aria-hidden="true"></div>')
+        bg_html = ('<img class="bg-img" src="' + esc(image_url) + '" alt="" '
+                   'aria-hidden="true" loading="lazy" decoding="async" referrerpolicy="no-referrer">'
+                   '<div class="bg-gradient" aria-hidden="true"></div>')
     else:
-        bg_html = (f'<div class="bg-fallback" style="background: {bg_color};" aria-hidden="true"></div>'
-                   f'<div class="bg-gradient" aria-hidden="true"></div>')
+        bg_html = ('<div class="bg-fallback" style="background: ' + bg_color + ';" aria-hidden="true"></div>'
+                   '<div class="bg-gradient" aria-hidden="true"></div>')
 
     posts_num = cluster['heat']
     if posts_num >= 10000:
@@ -428,30 +338,28 @@ def _render_topic_slide(i, cluster, colors, time_str, iso_time):
                 sub_posts_str = f"{sub_posts//1000}k"
             else:
                 sub_posts_str = str(sub_posts)
-            related_html += (f'<div class="related-item">'
-                             f'<span class="related-text">{esc(sub["text"])}</span>'
-                             f'<span class="related-posts">🔥 {sub_posts_str}</span>'
-                             f'</div>')
+            related_html += ('<div class="related-item">'
+                             '<span class="related-text">' + esc(sub["text"]) + '</span>'
+                             '<span class="related-posts">🔥 ' + sub_posts_str + '</span>'
+                             '</div>')
         related_html += '</div>'
 
-    return f"""
-    <article class="slide" aria-labelledby="heading-{i}">
-        {bg_html}
-        <time datetime="{esc(iso_time)}" class="update-badge">🔄 {esc(time_str)} 更新</time>
-        <div class="content">
-            <span class="hook-badge" role="text" style="background: {badge_color};">{esc(hook_text)}</span>
-            <h2 id="heading-{i}" class="title">{esc(rep['title'])}</h2>
-            <p class="summary">{esc(rep['summary'])}</p>
-            <footer class="meta" aria-label="ソーシャル反響">
-                <span class="meta-icon">🔥</span>
-                <span>{posts_str} ポスト{new_tag}</span>
-            </footer>
-            {related_html}
-        </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。背景ミスマッチ、原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
-        <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
-    </article>
-    """
+    return ('<article class="slide" aria-labelledby="heading-' + str(i) + '">'
+            + bg_html
+            + '<time datetime="' + esc(iso_time) + '" class="update-badge">🔄 ' + esc(time_str) + ' 更新</time>'
+            + '<div class="content">'
+            + '<span class="hook-badge" role="text" style="background: ' + badge_color + ';">' + esc(hook_text) + '</span>'
+            + '<h2 id="heading-' + str(i) + '" class="title">' + esc(rep['title']) + '</h2>'
+            + '<p class="summary">' + esc(rep['summary']) + '</p>'
+            + '<footer class="meta" aria-label="ソーシャル反響">'
+            + '<span class="meta-icon">🔥</span>'
+            + '<span>' + posts_str + ' ポスト' + new_tag + '</span>'
+            + '</footer>'
+            + related_html
+            + '</div>'
+            + '<div class="disclaimer" aria-hidden="true">※自動取得・自動要約。背景ミスマッチ、原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>'
+            + '<div class="hint" aria-hidden="true">SWIPE UP ↓</div>'
+            + '</article>')
 
 
 def _render_interruption_slide(i, data):
@@ -477,23 +385,21 @@ def _render_ranking_slide(i, data):
             posts_str = f"{posts//1000}k"
         else:
             posts_str = str(posts)
-        items_html += (f'<li class="ranking-item">'
-                       f'<span class="ranking-num">{idx}</span>'
-                       f'<span class="ranking-text">{text}</span>'
-                       f'<span class="ranking-posts">{posts_str} ポスト</span>'
-                       f'</li>')
+        items_html += ('<li class="ranking-item">'
+                       '<span class="ranking-num">' + str(idx) + '</span>'
+                       '<span class="ranking-text">' + text + '</span>'
+                       '<span class="ranking-posts">' + posts_str + ' ポスト</span>'
+                       '</li>')
 
-    return f"""
-    <article class="slide interruption-slide ranking-bg" aria-labelledby="ranking-heading-{i}">
-        <div class="interruption-content">
-            <span class="interruption-badge">Ranking</span>
-            <h2 id="ranking-heading-{i}" class="interruption-title">{title}</h2>
-            <ul class="ranking-list">{items_html}</ul>
-        </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
-        <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
-    </article>
-    """
+    return ('<article class="slide interruption-slide ranking-bg" aria-labelledby="ranking-heading-' + str(i) + '">'
+            '<div class="interruption-content">'
+            '<span class="interruption-badge">Ranking</span>'
+            '<h2 id="ranking-heading-' + str(i) + '" class="interruption-title">' + title + '</h2>'
+            '<ul class="ranking-list">' + items_html + '</ul>'
+            '</div>'
+            '<div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>'
+            '<div class="hint" aria-hidden="true">SWIPE UP ↓</div>'
+            '</article>')
 
 
 def _render_promo_slide(i, data):
@@ -503,18 +409,16 @@ def _render_promo_slide(i, data):
     cta = esc(data.get("cta", "詳しく見る"))
     cta_url = esc(data.get("cta_url", "#"))
 
-    return f"""
-    <article class="slide interruption-slide promo-bg" aria-labelledby="promo-heading-{i}">
-        <div class="interruption-content">
-            <span class="interruption-badge">{badge}</span>
-            <h2 id="promo-heading-{i}" class="interruption-title">{title}</h2>
-            <p class="interruption-desc">{description}</p>
-            <a href="{cta_url}" class="interruption-cta" target="_blank" rel="noopener noreferrer">{cta}</a>
-        </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
-        <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
-    </article>
-    """
+    return ('<article class="slide interruption-slide promo-bg" aria-labelledby="promo-heading-' + str(i) + '">'
+            '<div class="interruption-content">'
+            '<span class="interruption-badge">' + badge + '</span>'
+            '<h2 id="promo-heading-' + str(i) + '" class="interruption-title">' + title + '</h2>'
+            '<p class="interruption-desc">' + description + '</p>'
+            '<a href="' + cta_url + '" class="interruption-cta" target="_blank" rel="noopener noreferrer">' + cta + '</a>'
+            '</div>'
+            '<div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>'
+            '<div class="hint" aria-hidden="true">SWIPE UP ↓</div>'
+            '</article>')
 
 
 def _render_announcement_slide(i, data):
@@ -524,23 +428,17 @@ def _render_announcement_slide(i, data):
     cta = esc(data.get("cta", "確認する"))
     cta_url = esc(data.get("cta_url", "#"))
 
-    return f"""
-    <article class="slide interruption-slide" style="background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%);" aria-labelledby="announce-heading-{i}">
-        <div class="interruption-content">
-            <span class="interruption-badge">{badge}</span>
-            <h2 id="announce-heading-{i}" class="interruption-title">{title}</h2>
-            <p class="interruption-desc">{description}</p>
-            <a href="{cta_url}" class="interruption-cta" target="_blank" rel="noopener noreferrer">{cta}</a>
-        </div>
-        <div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>
-        <div class="hint" aria-hidden="true">SWIPE UP ↓</div>
-    </article>
-    """
+    return ('<article class="slide interruption-slide" style="background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%);" aria-labelledby="announce-heading-' + str(i) + '">'
+            '<div class="interruption-content">'
+            '<span class="interruption-badge">' + badge + '</span>'
+            '<h2 id="announce-heading-' + str(i) + '" class="interruption-title">' + title + '</h2>'
+            '<p class="interruption-desc">' + description + '</p>'
+            '<a href="' + cta_url + '" class="interruption-cta" target="_blank" rel="noopener noreferrer">' + cta + '</a>'
+            '</div>'
+            '<div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>'
+            '<div class="hint" aria-hidden="true">SWIPE UP ↓</div>'
+            '</article>')
 
-
-# ==========================================
-# 11. データ取得
-# ==========================================
 
 TARGET_URL = "https://search.yahoo.co.jp/realtime/search/matome"
 USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -602,10 +500,6 @@ def parse_html(html):
     return data_list
 
 
-# ==========================================
-# 12. メイン実行
-# ==========================================
-
 def main():
     prev_meta = load_prev_meta()
     prev_map = {c["core_token"]: c["heat"] for c in prev_meta.get("clusters", [])}
@@ -629,7 +523,6 @@ def main():
     slides = build_slides(clusters)
     slides = inject_interruptions(slides)
 
-    # OGP画像を出力ディレクトリにコピー
     ogp_src = os.path.join(os.path.dirname(__file__), "ogp-default.png")
     ogp_dst = os.path.join(OUTPUT_DIR, "ogp-default.png")
     if os.path.exists(ogp_src):
