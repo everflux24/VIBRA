@@ -1,9 +1,9 @@
 name: Auto Deployment Trigger
 
 on:
-  schedule:
-    - cron: '*/30 * * * *'
-  workflow_dispatch:
+  repository_dispatch:
+    types: [uprobot-trigger] # UptimeRobotからのAPIを受け取る設定
+  workflow_dispatch:        # GitHub画面からの手動実行も残しています
 
 jobs:
   trigger-deploy:
