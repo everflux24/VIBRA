@@ -17,6 +17,26 @@ import datetime
 from collections import Counter
 
 # ==========================================
+# コアロジックのインポート（Secretsから再構成されたファイル）
+# ==========================================
+
+try:
+    from core.token_cluster import (
+        extract_tokens, get_core_token, update_cluster_core_token,
+        should_merge, cluster_articles_v21, info_score, select_representative
+    )
+    from core.hook_reason import (
+        generate_hook, extract_event, build_sub_reasons,
+        GENERIC_WORDS, REACTION_KEYWORDS, SPECIFICITY_KEYWORDS
+    )
+    CORE_LOGIC_AVAILABLE = True
+except ImportError:
+    CORE_LOGIC_AVAILABLE = False
+    print("⚠️ コアロジックが見つかりません。core/token_cluster.py と core/hook_reason.py を確認してください。")
+    sys.exit(1)
+
+
+# ==========================================
 # 定数
 # ==========================================
 
@@ -26,25 +46,6 @@ FAVICON_SVG = (
     'href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 '
     'viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🔥%3C/text%3E%3C/svg%3E">'
 )
-
-GENERIC_WORDS = [
-    "ファン", "声", "歓喜", "期待", "話題", "動画", "様子", "登場",
-    "公開", "同士", "連発", "続出", "募集", "報告", "歓声", "熱狂",
-    # スポーツ用語: core_token から除外
-    "ホームラン", "打点", "勝利", "敗北", "引き分け", "完封", "サヨナラ",
-    "逆転", "延長", "決勝", "準決勝",
-]
-
-REACTION_KEYWORDS = [
-    'ファン歓喜', '話題', 'の声', 'の反応', '盛り上がり', 'ワクワク',
-    '感情が炸裂', '歓喜', '可愛い', '熱狂', '歓声', '最高', '面白い', '驚き',
-    '期待', '大盛り上がり'
-]
-
-SPECIFICITY_KEYWORDS = [
-    '映画', '放送', '公開', '決定', '発表', '発売', '予約',
-    '開始', '開催', '登場', '解禁', '初', '新', '周年'
-]
 
 # ==========================================
 # Slide 型定義
@@ -76,62 +77,17 @@ def parse_posts(post_str):
     except:
         return 0
 
-def extract_tokens(text):
-    tokens = []
-    tokens += re.findall(r'[ア-ン゛゜ァ-ォャ-ョー]{2,}', text)
-    tokens += re.findall(r'[一-龥々〆]{2,}', text)
-    tokens += re.findall(r'[a-zA-Z0-9]{2,}', text)
-    return [t for t in tokens if t not in GENERIC_WORDS]
 
 # ==========================================
 # 2. CoreToken 抽出
 # ==========================================
 
-def get_core_token(title, summary):
-    text = title + ' ' + summary
-    tokens = extract_tokens(text)
-    if not tokens:
-        return title[:10] if len(title) > 10 else title
 
-    title_tokens = extract_tokens(title)
-    freq = Counter(tokens)
-    scored = []
-    for t, count in freq.items():
-        score = count * 2
-        score += min(len(t), 8)
-        # タイトル先頭出現を優先（+10 → +5 に緩和）
-        if title_tokens and t == title_tokens[0]:
-            score += 5
-        elif t in title_tokens:
-            score += 5
-        if re.fullmatch(r'[ァ-ヴーヷ-ヺ・]+', t):
-            score += 3
-        if re.fullmatch(r'[一-龥々〆]{3,}', t):
-            score += 2
-        scored.append((t, score))
-
-    scored.sort(key=lambda x: x[1], reverse=True)
-    return scored[0][0] if scored else title[:10]
-
-def update_cluster_core_token(cluster):
-    all_text = ' '.join(a['title'] + ' ' + a.get('summary', '') for a in cluster['articles'])
-    tokens = extract_tokens(all_text)
-    freq = Counter(tokens)
-    if freq:
-        cluster['core_token'] = freq.most_common(1)[0][0]
-        cluster['token_counter'] = dict(freq.most_common(10))
-    else:
-        cluster['core_token'] = cluster['articles'][0].get('core_token', 'unknown')
 
 # ==========================================
 # 3. クラスタリング
 # ==========================================
 
-def should_merge(article, cluster):
-    a_core = article.get('core_token', '')
-    c_core = cluster.get('core_token', '')
-    if not a_core or not c_core:
-        return False
     if a_core == c_core:
         return True
     # 緩和: 4文字以上のトークン同士で部分一致を許可
@@ -148,122 +104,23 @@ def should_merge(article, cluster):
         return True
     return False
 
-def cluster_articles_v21(data_list):
-    articles = []
-    for item in data_list:
-        posts_num = parse_posts(item.get('posts', 0))
-        core = get_core_token(item['title'], item.get('summary', ''))
-        articles.append({
-            'title': item['title'],
-            'summary': item.get('summary', ''),
-            'posts': posts_num,
-            'image': item.get('image', ''),
-            'positive': item.get('positive'),
-            'core_token': core,
-        })
-
-    clusters = []
-    for article in articles:
-        merged = False
-        for cluster in clusters:
-            if should_merge(article, cluster):
-                cluster['articles'].append(article)
-                update_cluster_core_token(cluster)
-                merged = True
-                break
-        if not merged:
-            clusters.append({
-                'core_token': article['core_token'],
-                'token_counter': {article['core_token']: 1} if article['core_token'] else {},
-                'articles': [article]
-            })
-
-    for cluster in clusters:
-        heat = sum(a['posts'] for a in cluster['articles'])
-        past = sum(a.get('past_posts', 0) for a in cluster['articles'])
-        gain = heat - past
-        cluster['heat'] = heat
-        cluster['gain'] = gain
-        cluster['score'] = gain
-        cluster['rep'] = select_representative(cluster)
-        cluster['sub_reasons'] = build_sub_reasons(cluster, cluster['rep'])
-
-    clusters.sort(key=lambda c: c['score'], reverse=True)
-    return clusters
 
 # ==========================================
 # 4. 代表記事選定
 # ==========================================
 
-def info_score(title):
-    score = 0
-    score += len(re.findall(r'[ア-ン]{3,}', title)) * 2
-    score += len(re.findall(r'[一-龥]{2,}', title)) * 2
-    for kw in SPECIFICITY_KEYWORDS:
-        if kw in title:
-            score += 3
-    score += len(re.findall(r'\d+', title)) * 2
-    vague = ['について', 'の話題', 'と話題', 'が話題', 'される', '可能性']
-    for v in vague:
-        if v in title:
-            score -= 2
-    return max(score, 1)
 
-def select_representative(cluster):
-    scored = []
-    c_core = cluster.get('core_token', '')
-    for a in cluster['articles']:
-        score = a['posts'] * info_score(a['title'])
-        # core_tokenがクラスターと一致する記事を大幅優先（代表記事の整合性確保）
-        if a.get('core_token') == c_core:
-            score *= 3
-        scored.append((a, score))
-    scored.sort(key=lambda x: x[1], reverse=True)
-    return scored[0][0]
 
 # ==========================================
 # 5. Hook生成
 # ==========================================
 
-def generate_hook(core_token, title):
-    patterns = [
-        f"なぜ今、{core_token}？",
-        f"{core_token}、何が起きてる？",
-        f"{core_token}、ここがポイント",
-    ]
-    if any(w in title for w in ['発表', '決定', '公開', '放送', '発売']):
-        return patterns[0]
-    h = hashlib.md5(title.encode()).hexdigest()
-    return patterns[int(h, 16) % 2]
 
 # ==========================================
 # 6. 関連理由抽出
 # ==========================================
 
-def extract_event(title):
-    clean = title
-    for rk in REACTION_KEYWORDS:
-        if rk in clean:
-            clean = clean.split(rk)[0]
-    clean = re.sub(r'^[^がをにでは、]+[がをにでは、]', '', clean, count=1)
-    event = clean.strip("\u300c\u300d\u300e\u300f\"' ")
-    event = event.strip('\u3000')
-    event = re.sub(r'[がをにでは、]+$', '', event)
-    return event[:25] if len(event) >= 4 else title[:25]
 
-def build_sub_reasons(cluster, rep):
-    reasons = []
-    seen = set()
-    for a in cluster['articles']:
-        if a == rep:
-            continue
-        event = extract_event(a['title'])
-        if event and event not in seen and len(event) >= 4:
-            reasons.append({'text': event, 'posts': a['posts']})
-            seen.add(event)
-        if len(reasons) >= 2:
-            break
-    return reasons
 
 # ==========================================
 # 7. Slide ビルド
@@ -714,6 +571,7 @@ def main():
     clusters = cluster_articles_v21(data)
 
     for cluster in clusters:
+        cluster['sub_reasons'] = build_sub_reasons(cluster, cluster['rep'])
         cluster["heat_status"] = compute_heat_status(cluster, prev_map)
 
     save_meta(clusters)
