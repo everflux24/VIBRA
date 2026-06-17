@@ -183,6 +183,7 @@ def build_slides(clusters):
 def inject_interruptions(slides):
     """
     新着・急上昇記事をピックアップして先頭に配置。
+    ピックアップが5件未満の場合、heat順で上位を追加して5件を確保。
     ピックアップ済み記事は後続の通常表示から除外（重複なし）。
     """
     if not slides:
@@ -190,15 +191,31 @@ def inject_interruptions(slides):
 
     pickup_slides = []
     normal_slides = []
+    picked_indices = set()
 
-    for slide in slides:
+    # 1. 新着・急上昇をピックアップ
+    for i, slide in enumerate(slides):
         if slide.type != "topic":
-            normal_slides.append(slide)
             continue
         hs = slide.data.get("heat_status", {})
         if hs.get("is_new") or hs.get("status") == "surge":
             pickup_slides.append(slide)
-        else:
+            picked_indices.add(i)
+
+    # 2. 5件未満なら heat 順で上位を追加
+    if len(pickup_slides) < 5:
+        needed = 5 - len(pickup_slides)
+        for i, slide in enumerate(slides):
+            if i in picked_indices or slide.type != "topic":
+                continue
+            pickup_slides.append(slide)
+            picked_indices.add(i)
+            if len(pickup_slides) >= 5:
+                break
+
+    # 3. 残りを通常スライドに
+    for i, slide in enumerate(slides):
+        if i not in picked_indices:
             normal_slides.append(slide)
 
     return pickup_slides + normal_slides
