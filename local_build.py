@@ -375,6 +375,27 @@ def generate_app_html(slides, out_path=None):
       opacity: 0.4;
       pointer-events: none;
     }
+    .archive-footer-slide {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, #111 100%) !important;
+    }
+    .archive-footer-slide .archive-footer {
+      background: transparent !important;
+      backdrop-filter: none !important;
+      border-top: none !important;
+      padding: 2rem 0 !important;
+    }
+    .archive-footer-slide .archive-footer-label {
+      font-size: 1rem !important;
+      color: rgba(255,255,255,0.7) !important;
+      margin-bottom: 1rem !important;
+    }
+    .archive-footer-slide .archive-footer-link {
+      padding: 0.6rem 1rem !important;
+      font-size: 0.9rem !important;
+    }
     """
 
     css = '<style>' + archive_css + """
@@ -443,11 +464,16 @@ def generate_app_html(slides, out_path=None):
     parts.append('<title>' + esc(page_title) + '</title>' + css)
     parts.append('<script type="application/ld+json">' + json_ld + '</script>')
     parts.append('</head><body><h1 class="visually-hidden">\u4eca\u65e5\u306e\u65e5\u672c\u30c8\u30ec\u30f3\u30c9\u307e\u3068\u3081</h1>')
-    parts.append('<main class="app-container">' + slides_html + '</main>')
-
-    # v2.5: Archive footer
+    # v2.5: Archive footer as last slide
     archive_footer_html = generate_top_footer_archive_links(now, OUTPUT_DIR)
-    parts.append(archive_footer_html)
+    if archive_footer_html:
+        # footer を slide としてレンダリング（スワイプ対応）
+        footer_slide = ('<article class="slide archive-footer-slide" aria-label="アーカイブフッター">'
+                       + archive_footer_html
+                       + '</article>')
+        slides_html += footer_slide
+
+    parts.append('<main class="app-container">' + slides_html + '</main>')
     parts.append('</body></html>')
 
     full_html = "".join(parts)
