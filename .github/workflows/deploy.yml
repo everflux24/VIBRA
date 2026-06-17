@@ -1,4 +1,4 @@
-name: Build & Deploy VIBRA
+name: Build & Deploy Aoaeola
 
 on:
   repository_dispatch:
@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: vibra-pages
+  group: aoaeola-pages
   cancel-in-progress: false
 
 jobs:
@@ -26,8 +26,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: _site/build_meta.json
-          key: vibra-build-meta-${{ github.run_id }}
-          restore-keys: vibra-build-meta-
+          key: aoaeola-build-meta-${{ github.run_id }}
+          restore-keys: aoaeola-build-meta-
 
       - name: Setup Python
         uses: actions/setup-python@v5
