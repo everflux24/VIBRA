@@ -1,0 +1,30 @@
+# v0 sandbox internal files
+__v0_runtime_loader.js
+__v0_devtools.tsx
+__v0_jsx-dev-runtime.ts
+.snowflake/
+.v0-trash/
+.vercel/
+
+# Environment variables
+.env*.local
+
+# Node / Next.js (v0 テンプレートの残骸、VIBRA では不使用)
+node_modules/
+.next/
+pnpm-lock.yaml
+next-env.d.ts
+
+# macOS
+.DS_Store
+
+# VIBRA 生成物（Pages はワークフローが都度生成）
+_site/
+archive/
+index.html
+__pycache__/
+*.pyc
+
+# v2.1 以降で廃止された自己学習 DB
+bad_topics.json
+bad_topic_counts.json
