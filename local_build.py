@@ -810,12 +810,12 @@ def main():
     now = datetime.datetime.now(jst)
     iso_time = now.isoformat()
 
+    # v2.5: Archive generation FIRST (before footer link generation)
+    save_archive(clusters, now, iso_time)
+
     generate_app_html(slides)
     generate_sitemap()
     generate_robots_txt()
-
-    # v2.5: Archive generation
-    save_archive(clusters, now, iso_time)
 
     # v2.5: 365-day cleanup
     deleted = cleanup_old_archives(OUTPUT_DIR, cutoff_days=365)
