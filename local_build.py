@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Aoaeola v2.4 - CoreToken Architecture + Interruption Layer + Heat Delta
-                      + SEO Structured Data (<time datetime>, JSON-LD, OGP fix)
+Aoaeola v2.5 - CoreToken Architecture + Interruption Layer + Heat Delta
+                      + SEO Structured Data + Summary Quality Filter
                       NO f-string VERSION
 ==========================================================================
 """
@@ -40,6 +40,79 @@ FAVICON_SVG = (
     + chr(0x1F525)
     + '%3C/text%3E%3C/svg%3E">'
 )
+
+
+# ==========================================
+# サマリー品質フィルタ（v2.5追加）
+# ==========================================
+
+AI_PATTERNS = [
+    r'と話題になっている',
+    r'とSNSで話題に',
+    r'達成したよ',
+    r'発売されたよ',
+    r'公開されたよ',
+    r'開始されたよ',
+    r'決定したよ',
+    r'みたいです',
+    r'みたいで',
+    r'ようです',
+    r'ようだ',
+    r'様子がうかがえる',
+    r'とみられる',
+    r'と思われる',
+    r'と思われ',
+    r'と考えられる',
+    r'と推測される',
+    r'の可能性がある',
+    r'かもしれない',
+    r'かもしれません',
+    r'だろう',
+    r'でしょう',
+    r'のようだ',
+    r'のような',
+    r'といった',
+    r'などと',
+    r'などが',
+    r'などの',
+    r' reportedly',
+    r' allegedly',
+]
+
+def clean_summary(summary):
+    """
+    生成AIによる安定的表現を除去し、サマリー品質を向上
+    """
+    if not summary or summary == "\u8a73\u7d30\u306a\u3057":
+        return summary
+
+    original = summary
+
+    # AIパターンを除去
+    for pattern in AI_PATTERNS:
+        summary = re.sub(pattern, '', summary)
+
+    # 口語表現を除去・正規化
+    summary = re.sub(r'\s*よ\s*。', '。', summary)
+    summary = re.sub(r'\s*だよ\s*。', '。', summary)
+    summary = re.sub(r'\s*なんだ\s*。', '。', summary)
+    summary = re.sub(r'\s*みたい\s*。', '。', summary)
+    summary = re.sub(r'\s*みたいです\s*。', '。', summary)
+    summary = re.sub(r'\s*ようです\s*。', '。', summary)
+
+    # 冗長な空白を正規化
+    summary = re.sub(r'\s+', ' ', summary)
+
+    # 文末が不自然な場合は修正
+    summary = summary.strip()
+    if summary.endswith('が') or summary.endswith('を') or summary.endswith('に'):
+        summary = summary + '。'
+
+    # 空になった場合は元に戻す
+    if not summary.strip():
+        summary = original
+
+    return summary
 
 
 class Slide:
@@ -210,14 +283,14 @@ def generate_app_html(slides, out_path=None):
 
     ogp_image_url = "https://everflux24.github.io/Aoaeola/ogp-default.png?v=" + version
 
-    # === タイトル・ディスクリプション更新 ===
     page_title = "Aoaeola\uff5c\u3086\u308b\u304f\u77b0\u3081\u308bX\u30c8\u30ec\u30f3\u30c9"
     page_desc = "\u6687\u3064\u3076\u3057\u306e\u3064\u3044\u3067\u306b\u3001\u4e16\u306e\u4e2d\u306e\u7a7a\u6c17\u304c\u306a\u3093\u3068\u306a\u304f\u308f\u304b\u308b\u3002X\u3067\u8a71\u984c\u306e\u30cb\u30e5\u30fc\u30b9\u3084\u30c8\u30ec\u30f3\u30c9\u309230\u5206\u3054\u3068\u306b\u307e\u3068\u3081\u308b\u3001\u3086\u308b\u304f\u77b0\u3081\u308b\u305f\u3081\u306e\u30b5\u30fc\u30d3\u30b9\u3067\u3059\u3002"
     ogp_desc = "\u30cb\u30e5\u30fc\u30b9\u3084\u6d41\u884c\u306e\u201c\u307f\u3093\u306a\u306e\u53cd\u5fdc\u201d\u3092\u3001\u7e26\u30b9\u30ef\u30a4\u30d7\u3067\u6c17\u8efd\u306b\u30c1\u30a7\u30c3\u30af\u3002\u5c11\u3057\u7a7a\u3044\u305f\u6642\u9593\u306e\u6687\u3064\u3076\u3057\u306b\u3002"
 
     json_ld = generate_json_ld(slides, iso_time, page_title, page_desc)
 
-    css = """
+    # v2.5: アーカイブリンクCSSを追加
+    css = ARCHIVE_LINKS_CSS + """
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif; background: #000; color: #fff; overflow: hidden; }
@@ -288,6 +361,10 @@ def generate_app_html(slides, out_path=None):
     parts.append('<script type="application/ld+json">' + json_ld + '</script>')
     parts.append('</head><body><h1 class="visually-hidden">\u4eca\u65e5\u306e\u65e5\u672c\u30c8\u30ec\u30f3\u30c9\u307e\u3068\u3081</h1>')
     parts.append('<main class="app-container">' + slides_html + '</main>')
+
+    # v2.5: フッターにアーカイブリンクを追加
+    archive_footer_html = generate_top_footer_archive_links(now)
+    parts.append(archive_footer_html)
     parts.append('</body></html>')
 
     full_html = "".join(parts)
@@ -299,14 +376,66 @@ def generate_app_html(slides, out_path=None):
 
 
 def generate_sitemap(base_url="https://everflux24.github.io/Aoaeola"):
+    """sitemap.xml を生成：トップページ + 全アーカイブURL"""
     jst = datetime.timezone(datetime.timedelta(hours=9))
     now = datetime.datetime.now(jst)
-    lastmod = now.strftime("%Y-%m-%dT%H:%M:%S+09:00")
-    xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>" + base_url + "/</loc>\n    <lastmod>" + lastmod + "</lastmod>\n    <changefreq>always</changefreq>\n    <priority>1.0</priority>\n  </url>\n</urlset>"
+
+    urls = []
+
+    # 1. トップページ
+    urls.append({
+        'loc': base_url + '/',
+        'lastmod': now.strftime("%Y-%m-%dT%H:%M:%S+09:00"),
+        'changefreq': 'always',
+        'priority': '1.0'
+    })
+
+    # 2. アーカイブURL（365日分）
+    archive_dir = Path("archive")
+    if archive_dir.exists():
+        for year_dir in sorted(archive_dir.iterdir()):
+            if not year_dir.is_dir():
+                continue
+            for month_dir in sorted(year_dir.iterdir()):
+                if not month_dir.is_dir():
+                    continue
+                for day_dir in sorted(month_dir.iterdir()):
+                    if not day_dir.is_dir():
+                        continue
+                    for html_file in sorted(day_dir.glob("*.html")):
+                        rel_path = html_file.relative_to(archive_dir)
+                        url = base_url + '/archive/' + str(rel_path).replace('\\', '/')
+                        mtime = datetime.datetime.fromtimestamp(
+                            html_file.stat().st_mtime,
+                            tz=jst
+                        )
+                        urls.append({
+                            'loc': url,
+                            'lastmod': mtime.strftime("%Y-%m-%dT%H:%M:%S+09:00"),
+                            'changefreq': 'never',
+                            'priority': '0.3'
+                        })
+
+    xml_parts = ['<?xml version="1.0" encoding="UTF-8"?>']
+    xml_parts.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    for url in urls:
+        xml_parts.append('  <url>')
+        xml_parts.append('    <loc>' + esc(url['loc']) + '</loc>')
+        xml_parts.append('    <lastmod>' + url['lastmod'] + '</lastmod>')
+        xml_parts.append('    <changefreq>' + url['changefreq'] + '</changefreq>')
+        xml_parts.append('    <priority>' + url['priority'] + '</priority>')
+        xml_parts.append('  </url>')
+    xml_parts.append('</urlset>')
+
+    xml = '\n'.join(xml_parts)
     sitemap_path = os.path.join(OUTPUT_DIR, "sitemap.xml")
     with open(sitemap_path, "w", encoding="utf-8") as f:
         f.write(xml)
-    print("Generated: " + sitemap_path)
+
+    print("Generated sitemap.xml: " + str(len(urls)) + " URLs")
+    print("  - Top page: 1")
+    print("  - Archives: " + str(len(urls) - 1))
+    return sitemap_path
 
 
 def generate_robots_txt(base_url="https://everflux24.github.io/Aoaeola"):
@@ -320,7 +449,10 @@ def generate_robots_txt(base_url="https://everflux24.github.io/Aoaeola"):
 def _render_topic_slide(i, cluster, colors, time_str, iso_time, is_h3=False):
     rep = cluster['rep']
     bg_color = colors[i % len(colors)]
-    hook_text = generate_hook(cluster['core_token'], rep['title'])
+
+    # v2.5: cluster_sizeを渡してHookを統一
+    cluster_size = len(cluster.get('articles', []))
+    hook_text = generate_hook(cluster['core_token'], rep['title'], cluster_size)
 
     hs = cluster.get("heat_status", {})
     badge_color = hs.get("badge_color", "#ffea00")
@@ -510,6 +642,10 @@ def parse_html(html):
         if not title:
             continue
         summary = (it.get("summary") or "\u8a73\u7d30\u306a\u3057").strip()
+
+        # v2.5: サマリー品質フィルタ適用
+        summary = clean_summary(summary)
+
         posts = it.get("tweetCount", 0)
         image = ""
         img = it.get("image")
@@ -545,6 +681,8 @@ def main():
     clusters = cluster_articles_v21(data)
 
     for cluster in clusters:
+        # v2.5: cluster_sizeを渡してHook統一
+        cluster_size = len(cluster.get('articles', []))
         cluster['sub_reasons'] = build_sub_reasons(cluster, cluster['rep'])
         cluster["heat_status"] = compute_heat_status(cluster, prev_map)
 
@@ -566,9 +704,16 @@ def main():
     generate_sitemap()
     generate_robots_txt()
 
+    # v2.5: アーカイブ生成
+    save_archive(clusters, now, iso_time)
+
+    # v2.5: 365日超えクリーンアップ
+    cleanup_old_archives(now, days=365)
+
+
     new_count = sum(1 for c in clusters if c["heat_status"]["is_new"])
     surge_count = sum(1 for c in clusters if c["heat_status"]["status"] == "surge")
-    print("\nAoaeola v2.4 build complete")
+    print("\nAoaeola v2.5 build complete")
     print("  Clusters: " + str(len(clusters)))
     print("  New: " + str(new_count) + " | Surge: " + str(surge_count))
     print("  Total slides: " + str(len(slides)))
