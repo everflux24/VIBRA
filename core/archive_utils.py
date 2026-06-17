@@ -92,7 +92,9 @@ def get_recent_archive_links(base_dir: str, days: int = 7) -> list:
     """
     archive_root = Path(base_dir) / "archive"
     links = []
-    today = datetime.now()
+    # JST（日本標準時）で今日の日付を取得
+    jst = __import__("datetime").timezone(__import__("datetime").timedelta(hours=9))
+    today = datetime.now(jst)
 
     for i in range(days):
         d = today - timedelta(days=i)
