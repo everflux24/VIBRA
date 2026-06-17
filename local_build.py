@@ -275,8 +275,10 @@ def generate_app_html(slides, out_path=None):
         .hook-badge { display: inline-block; color: #000; font-size: 14px; font-weight: 800; padding: 6px 14px; border-radius: 20px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         h2.title { font-size: 26px; font-weight: 900; line-height: 1.3; margin-bottom: 12px; text-shadow: 0 2px 16px rgba(0,0,0,0.8); }
         h3.title { font-size: 22px; font-weight: 900; line-height: 1.3; margin-bottom: 12px; text-shadow: 0 2px 16px rgba(0,0,0,0.8); }
-        .section-heading { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); padding: 14px 24px; font-size: 14px; font-weight: 800; color: #ffea00; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .section-heading h2 { font-size: 14px; font-weight: 800; margin: 0; }
+        .section-bar { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); padding: 12px 24px; font-size: 13px; font-weight: 800; color: #ffea00; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; gap: 8px; }
+        .section-icon { font-size: 16px; }
+        .section-title { font-size: 13px; font-weight: 800; margin: 0; }
+        .category-badge { display: inline-block; background: rgba(255,255,255,0.15); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
         p.summary { font-size: 15px; line-height: 1.65; color: #eee; background: rgba(20,20,20,0.5); padding: 16px; border-radius: 12px; backdrop-filter: blur(6px); margin-bottom: 16px; }
         .meta { font-size: 16px; color: #ff6b6b; font-weight: 800; display: flex; align-items: center; gap: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.8); margin-bottom: 14px; }
         .meta-icon { font-size: 18px; }
@@ -369,10 +371,10 @@ def _render_section_header(data):
     icon = data.get("icon", "")
     title = data.get("title", "")
     section_id = data.get("id", "")
-    return ('<section aria-labelledby="' + section_id + '">'
-            '<div class="section-heading" id="' + section_id + '">'
-            '<h2>' + icon + ' ' + esc(title) + '</h2>'
-            '</div></section>')
+    return ('<div class="section-bar" id="' + section_id + '" role="region" aria-label="' + esc(title) + '">'
+            '<span class="section-icon">' + icon + '</span>'
+            '<span class="section-title">' + esc(title) + '</span>'
+            '</div>')
 
 
 def _render_topic_slide(i, cluster, colors, time_str, iso_time, is_h3=False):
@@ -426,6 +428,11 @@ def _render_topic_slide(i, cluster, colors, time_str, iso_time, is_h3=False):
     parts.append('<time datetime="' + esc(iso_time) + '" class="update-badge">' + chr(0x1F504) + ' ' + esc(time_str) + ' \u66f4\u65b0</time>')
     parts.append('<div class="content">')
     parts.append('<span class="hook-badge" role="text" style="background: ' + badge_color + ';">' + esc(hook_text) + '</span>')
+    # Add category badge
+    cat = cluster.get('category', 'matome')
+    cat_name = CATEGORIES.get(cat, {}).get('name', 'その他')
+    cat_icon = CATEGORIES.get(cat, {}).get('icon', '')
+    parts.append('<span class="category-badge">' + cat_icon + ' ' + esc(cat_name) + '</span>')
     tag_name = "h3" if is_h3 else "h2"
     parts.append('<' + tag_name + ' id="heading-' + str(i) + '" class="title">' + esc(rep['title']) + '</' + tag_name + '>')
     parts.append('<p class="summary">' + esc(rep['summary']) + '</p>')
