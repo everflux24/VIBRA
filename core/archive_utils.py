@@ -93,7 +93,7 @@ def get_recent_archive_links(base_dir: str, days: int = 7) -> list:
     各日付の最新HTMLファイルへの直接リンクを生成。
     戻り値: [{"date_str": "06/17", "path": "archive/2026/06/17/16-00.html", "has_data": True}, ...]
     """
-    archive_root = Path(base_dir) / "archive"
+    archive_root = Path(base_dir).resolve() / "archive"
     links = []
     today = datetime.now(JST)
 
