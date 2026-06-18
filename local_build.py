@@ -732,8 +732,12 @@ def save_archive(clusters, now, iso_time):
         core_token = clusters[0]["core_token"] if clusters else "trend"
         colors = get_color_from_token(core_token)
 
-        # テンプレート読み込み
+        # テンプレート読み込み（存在チェック付き）
         template_path = os.path.join(os.path.dirname(__file__), "templates", "archive_page.html")
+        if not os.path.exists(template_path):
+            print("WARNING: Archive template not found: " + template_path)
+            print("  Skipping archive generation.")
+            return
         with open(template_path, "r", encoding="utf-8") as f:
             template = f.read()
 
