@@ -48,6 +48,8 @@ from core.archive_utils import (
     get_archive_hour_blocks,
     cleanup_old_archives,
     get_recent_archive_links,
+    get_adjacent_archive_links,
+    get_archive_nav_html,
     generate_archive_title,
 )
 
@@ -770,16 +772,32 @@ def save_archive(clusters, now, iso_time):
             summary = rep.get("summary", "")
             posts = c.get("heat", 0)
             if posts >= 10000:
-                posts_str = str(round(posts / 10000, 1)) + "\u4e07"
+                posts_str = str(round(posts / 10000, 1)) + "万"
             else:
                 posts_str = "{:,}".format(posts)
             content_cards += (
                 '<article class="card">'
                 '<h2>' + esc(title) + '</h2>'
                 '<p>' + esc(summary) + '</p>'
-                '<div class="meta">' + chr(0x1F525) + ' ' + posts_str + ' \u30dd\u30b9\u30c8</div>'
+                '<div class="meta">' + chr(0x1F525) + ' ' + posts_str + ' ポスト</div>'
                 '</article>'
             )
+
+        # 前後4時間枠リンク生成
+        adjacent = get_adjacent_archive_links(OUTPUT_DIR, block_time)
+        if adjacent["prev"]:
+            prev_link = ('<a href="' + adjacent["prev"]["url"] + '">'
+                        + chr(0x2190) + ' ' + adjacent["prev"]["text"] + '</a>')
+        else:
+            prev_link = '<span class="disabled">' + chr(0x2190) + ' 前へ</span>'
+        if adjacent["next"]:
+            next_link = ('<a href="' + adjacent["next"]["url"] + '">'
+                        + adjacent["next"]["text"] + ' ' + chr(0x2192) + '</a>')
+        else:
+            next_link = '<span class="disabled">次へ ' + chr(0x2192) + '</span>'
+
+        # 過去7日アーカイブナビゲーション
+        archive_nav_html = get_archive_nav_html(OUTPUT_DIR, block_time, days=7)
 
         # テンプレートレンダリング
         html = template.replace("{{archive_title}}", generate_archive_title(block_time))
@@ -793,9 +811,12 @@ def save_archive(clusters, now, iso_time):
         html = html.replace("{{gradient_end}}", colors["end"])
         html = html.replace("{{hue_start}}", str(colors["hue_start"]))
         html = html.replace("{{iso_datetime}}", block_time.isoformat())
-        html = html.replace("{{display_datetime}}", block_time.strftime("%Y\u5e74%m\u6708%d\u65e5 %H:%M"))
+        html = html.replace("{{display_datetime}}", block_time.strftime("%Y年%m月%d日 %H:%M"))
         html = html.replace("{{content_cards}}", content_cards)
         html = html.replace("{{generation_time}}", now.strftime("%Y-%m-%d %H:%M:%S"))
+        html = html.replace("{{prev_link}}", prev_link)
+        html = html.replace("{{next_link}}", next_link)
+        html = html.replace("{{archive_nav}}", archive_nav_html)
 
         with open(archive_file, "w", encoding="utf-8") as f:
             f.write(html)
