@@ -776,7 +776,7 @@ def save_archive(clusters, now, iso_time):
             f.write(html)
 
     block_count = len(list(get_archive_hour_blocks(now)))
-        print("Archive generated: " + str(block_count) + " files")
+    print("Archive generated: " + str(block_count) + " files")
 
 
 # ============================================================
