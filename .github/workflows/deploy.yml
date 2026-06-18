@@ -2,10 +2,10 @@ name: Build & Deploy Aoaeola
 
 on:
   repository_dispatch:
-    types: [uprobot-trigger] # cron-job.orgからの自動トリガーを受け取る設定
-  workflow_dispatch:        # GitHub画面から手動で実行する設定
+    types: [uprobot-trigger]
+  workflow_dispatch:
   push:
-    branches: [main]        # メインブランチに直接プッシュがあった時も実行する設定
+    branches: [main]
 
 permissions:
   pages: write
@@ -42,12 +42,44 @@ jobs:
           mkdir -p core
           echo "$VIBRA_CORE_1" > core/token_cluster.py
           echo "$VIBRA_CORE_2" > core/hook_reason.py
-          echo "✅ Core logic reconstructed from Secrets"
+          echo "✅ Core logic reconstructed"
+
+      - name: Pre-build diagnostic
+        run: |
+          echo "=== Working Directory ==="
+          pwd
+          echo "=== Directory Structure ==="
+          ls -la
+          echo "=== templates/ ==="
+          ls -la templates/ 2>/dev/null || echo "❌ templates/ not found"
+          echo "=== core/ ==="
+          ls -la core/ 2>/dev/null || echo "❌ core/ not found"
+          echo "=== Python Path ==="
+          python -c "import sys; print('\n'.join(sys.path))"
 
       - name: Build site
         env:
           VIBRA_OUTPUT_DIR: _site
-        run: python local_build.py
+        run: |
+          python local_build.py 2>&1 | tee build.log
+          echo "=== BUILD EXIT CODE: $? ==="
+
+      - name: Post-build diagnostic
+        run: |
+          echo "=== _site Directory Structure ==="
+          find _site -type f 2>/dev/null | sort || echo "❌ _site not found"
+          echo ""
+          echo "=== Archive Directory Check ==="
+          if [ -d "_site/archive" ]; then
+            echo "✅ _site/archive exists"
+            find _site/archive -type f | wc -l
+            find _site/archive -type f | head -20
+          else
+            echo "❌ _site/archive does NOT exist"
+          fi
+          echo ""
+          echo "=== Build Log (last 50 lines) ==="
+          tail -50 build.log 2>/dev/null || echo "No build.log"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
