@@ -38,13 +38,12 @@ def get_archive_path(base_dir: str, dt: datetime) -> Path:
 
 def get_archive_hour_blocks(dt: datetime) -> list:
     """
-    指定日時を含む4時間枠の開始時刻を1つだけ返す。
+    指定日時を含む4時間枠の開始時刻リストを返す。
     0,4,8,12,16,20 のどれかに丸める。
-    例：13:15 → 12:00 のみを返す
     """
-    block_start = (dt.hour // 4) * 4
     return [
-        dt.replace(hour=block_start, minute=0, second=0, microsecond=0)
+        dt.replace(hour=h, minute=0, second=0, microsecond=0)
+        for h in range(0, 24, 4)
     ]
 
 
@@ -91,7 +90,8 @@ def cleanup_old_archives(base_dir: str, cutoff_days: int = 365) -> list:
 def get_recent_archive_links(base_dir: str, days: int = 7) -> list:
     """
     過去N日分のアーカイブ日付リンク情報を返す。
-    戻り値: [{"date_str": "06/17", "path": "archive/2026/06/17/", "has_data": True}, ...]
+    各日付の最新HTMLファイルへの直接リンクを生成。
+    戻り値: [{"date_str": "06/17", "path": "archive/2026/06/17/16-00.html", "has_data": True}, ...]
     """
     archive_root = Path(base_dir) / "archive"
     links = []
@@ -101,9 +101,25 @@ def get_recent_archive_links(base_dir: str, days: int = 7) -> list:
         d = today - timedelta(days=i)
         date_path = archive_root / f"{d.year}/{d.month:02d}/{d.day:02d}"
         has_data = date_path.exists() and any(date_path.iterdir())
+
+        # 日付ディレクトリ内のHTMLファイルを探す
+        html_file = ""
+        if has_data:
+            try:
+                html_files = sorted([f.name for f in date_path.iterdir() if f.suffix == ".html"])
+                if html_files:
+                    html_file = html_files[-1]  # 最新のファイル
+            except (OSError, PermissionError):
+                pass
+
+        if html_file:
+            path = f"archive/{d.year}/{d.month:02d}/{d.day:02d}/{html_file}"
+        else:
+            path = f"archive/{d.year}/{d.month:02d}/{d.day:02d}/"
+
         links.append({
             "date_str": f"{d.month:02d}/{d.day:02d}",
-            "path": f"archive/{d.year}/{d.month:02d}/{d.day:02d}/",
+            "path": path,
             "has_data": has_data,
         })
 
