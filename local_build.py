@@ -4,6 +4,7 @@
 Aoaeola v2.5 - CoreToken Architecture + Interruption Layer + Heat Delta
                       + SEO Structured Data + Summary Quality Filter
                       + Archive System (4h blocks / 365d rolling / Gradient BG)
+                      + Pickup Logic (5 min) + Canonical URL
                       NO f-string VERSION
 ============================================================================
 """
@@ -111,6 +112,60 @@ AI_PATTERNS = [
     r'などの',
     r' reportedly',
     r' allegedly',
+    # v2.5: 不自然な語尾パターン（話し言葉・伝聞表現）
+    r'んだって',
+    r'なるね',
+    r'謝ってました',
+    r'てました',
+    r'だよ',
+    r'だね',
+    r'みたい',
+    r'ようだ',
+    r'らしい',
+    r'そうだ',
+    r'そうです',
+    r'っぽい',
+    r'っぽいです',
+    r'っぽかった',
+    r'っぽかったです',
+    r'っぽいんだ',
+    r'っぽいんだって',
+    r'っぽいんだね',
+    r'っぽいんだよ',
+    r'っぽいんだけど',
+    r'っぽいんですが',
+    r'っぽいんですけど',
+    r'っぽいんですね',
+    r'っぽいんですよ',
+    r'っぽいんです',
+    r'っぽいん',
+    r'っぽいよ',
+    r'っぽいね',
+    r'っぽいな',
+    r'っぽいわ',
+    r'っぽいぞ',
+    r'っぽいか',
+    r'っぽいかな',
+    r'っぽいかも',
+    r'っぽいかもしれない',
+    r'っぽいかもしれません',
+    r'っぽいかもね',
+    r'っぽいかもよ',
+    r'っぽいかもな',
+    r'っぽいかもわ',
+    r'っぽいかもぞ',
+    r'っぽいかもか',
+    r'っぽいかもかな',
+    r'っぽいかもかも',
+    r'っぽいかもかもしれない',
+    r'っぽいかもかもしれません',
+    r'っぽいかもかもね',
+    r'っぽいかもかもよ',
+    r'っぽいかもかもな',
+    r'っぽいかもかもわ',
+    r'っぽいかもかもぞ',
+    r'っぽいかもかもか',
+    r'っぽいかもかもかな',
 ]
 
 
@@ -309,7 +364,12 @@ def generate_json_ld(slides, iso_time, page_title, page_desc):
                 "description": desc,
                 "datePublished": iso_time,
                 "dateModified": iso_time,
-                "url": "https://everflux24.github.io/Aoaeola/"
+                "url": "https://everflux24.github.io/Aoaeola/",
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "Aoaeola",
+                    "url": "https://everflux24.github.io/Aoaeola/"
+                }
             }
         })
         position += 1
@@ -336,7 +396,7 @@ def generate_top_footer_archive_links(now, output_dir):
     links = get_recent_archive_links(output_dir, days=7)
     if not links:
         return ""
-    html_parts = ['<footer class="archive-footer">']
+    html_parts = ['<<footer class="archive-footer">']
     html_parts.append('<div class="archive-footer-label">\u904e\u53bb7\u65e5\u306e\u30a2\u30fc\u30ab\u30a4\u30d6</div>')
     html_parts.append('<div class="archive-footer-links">')
     for link in links:
@@ -367,9 +427,10 @@ def generate_app_html(slides, out_path=None):
     iso_time = now.isoformat()
     ogp_image_url = "https://everflux24.github.io/Aoaeola/ogp-default.png?v=" + version
 
-    page_title = "Aoaeola\uff5c\u3086\u308b\u304f\u77b0\u3081\u308bX\u30c8\u30ec\u30f3\u30c9"
-    page_desc = "\u6687\u3064\u3076\u3057\u306e\u3064\u3044\u3067\u306b\u3001\u4e16\u306e\u4e2d\u306e\u7a7a\u6c17\u304c\u306a\u3093\u3068\u306a\u304f\u308f\u304b\u308b\u3002X\u3067\u8a71\u984c\u306e\u30cb\u30e5\u30fc\u30b9\u3084\u30c8\u30ec\u30f3\u30c9\u309230\u5206\u3054\u3068\u306b\u307e\u3068\u3081\u308b\u3001\u3086\u308b\u304f\u77b0\u3081\u308b\u305f\u3081\u306e\u30b5\u30fc\u30d3\u30b9\u3067\u3059\u3002"
-    ogp_desc = "\u30cb\u30e5\u30fc\u30b9\u3084\u6d41\u884c\u306e\u201c\u307f\u3093\u306a\u306e\u53cd\u5fdc\u201d\u3092\u3001\u7e26\u30b9\u30ef\u30a4\u30d7\u3067\u6c17\u8efd\u306b\u30c1\u30a7\u30c3\u30af\u3002\u5c11\u3057\u7a7a\u3044\u305f\u6642\u9593\u306e\u6687\u3064\u3076\u3057\u306b\u3002"
+    # v2.5 SEO: title/description 統一
+    page_title = "\u4eca\u65e5\u306eX\u30c8\u30ec\u30f3\u30c9\u307e\u3068\u3081\uff5cAoaeola"
+    page_desc = "X\u3067\u4eca\u8a71\u984c\u306e\u30c8\u30ec\u30f3\u30c9\u3084\u30cb\u30e5\u30fc\u30b9\u309230\u5206\u3054\u3068\u306b\u81ea\u52d5\u307e\u3068\u3081\u3002SNS\u306e\u53cd\u5fdc\u3084\u7a7a\u6c17\u611f\u3092\u3001\u5fd9\u3057\u3044\u4eba\u3067\u3082\u6570\u5206\u3067\u30c1\u30a7\u30c3\u30af\u3067\u304d\u308b\u30c8\u30ec\u30f3\u30c9\u307e\u3068\u3081\u30b5\u30fc\u30d3\u30b9\u3067\u3059\u3002"
+    ogp_desc = page_desc  # \u7d71\u4e00
 
     json_ld = generate_json_ld(slides, iso_time, page_title, page_desc)
 
@@ -432,6 +493,20 @@ def generate_app_html(slides, out_path=None):
     .archive-footer-slide .archive-footer-link {
       padding: 0.6rem 1rem !important;
       font-size: 0.9rem !important;
+    }
+    .site-title {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.6);
+      z-index: 50;
+      letter-spacing: 1px;
+    }
+    .page-subtitle {
+      display: none;
     }
     """
 
@@ -497,15 +572,24 @@ def generate_app_html(slides, out_path=None):
     parts.append('<meta property="og:description" content="' + esc(ogp_desc) + '">')
     parts.append('<meta property="og:type" content="website"><meta property="og:url" content="https://everflux24.github.io/Aoaeola/">')
     parts.append('<meta property="og:image" content="' + esc(ogp_image_url) + '"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">')
+    # v2.5 SEO: canonical URL
+    parts.append('<link rel="canonical" href="https://everflux24.github.io/Aoaeola/">')
     parts.append(FAVICON_SVG)
     parts.append('<title>' + esc(page_title) + '</title>' + css)
     parts.append('<script type="application/ld+json">' + json_ld + '</script>')
-    parts.append('</head><body><h1 class="visually-hidden">\u4eca\u65e5\u306e\u65e5\u672c\u30c8\u30ec\u30f3\u30c9\u307e\u3068\u3081</h1>')
+    parts.append('</head><body>')
+
+    # v2.5 SEO: H1/H2 構造
+    h1_text = "Aoaeola \u2014 \u3086\u308b\u304f\u77b0\u3081\u308bX\u30c8\u30ec\u30f3\u30c9\u307e\u3068\u3081"
+    h2_text = "\u4eca\u65e5\u306e\u65e5\u672c\u30c8\u30ec\u30f3\u30c9\uff08" + now.strftime('%Y\u5e74%m\u6708%d\u65e5 %H:%M') + "\u66f4\u65b0\uff09"
+    parts.append('<h1 class="site-title">' + esc(h1_text) + '</h1>')
+    parts.append('<h2 class="page-subtitle">' + esc(h2_text) + '</h2>')
+
     # v2.5: Archive footer as last slide
     archive_footer_html = generate_top_footer_archive_links(now, OUTPUT_DIR)
     if archive_footer_html:
         # footer を slide としてレンダリング（スワイプ対応）
-        footer_slide = ('<article class="slide archive-footer-slide" aria-label="アーカイブフッター">'
+        footer_slide = ('<<article class="slide archive-footer-slide" aria-label="\u30a2\u30fc\u30ab\u30a4\u30d6\u30d5\u30c3\u30bf\u30fc">'
                        + archive_footer_html
                        + '</article>')
         slides_html += footer_slide
@@ -536,11 +620,11 @@ def _render_topic_slide(i, cluster, colors, time_str, iso_time, is_h3=False):
     rep_title = rep.get('title', '')
     image_url = rep.get('image', '') if c_core in rep_title else ''
     if image_url:
-        bg_html = ('<img class="bg-img" src="' + esc(image_url) + '" alt="" '
+        bg_html = ('<<img class="bg-img" src="' + esc(image_url) + '" alt="" '
                    'aria-hidden="true" loading="lazy" decoding="async" referrerpolicy="no-referrer">'
                    '<div class="bg-gradient" aria-hidden="true"></div>')
     else:
-        bg_html = ('<div class="bg-fallback" style="background: ' + bg_color + ';" aria-hidden="true"></div>'
+        bg_html = ('<<div class="bg-fallback" style="background: ' + bg_color + ';" aria-hidden="true"></div>'
                    '<div class="bg-gradient" aria-hidden="true"></div>')
     posts_num = cluster['heat']
     if posts_num >= 10000:
@@ -558,7 +642,7 @@ def _render_topic_slide(i, cluster, colors, time_str, iso_time, is_h3=False):
                 sub_posts_str = str(sub_posts // 1000) + "k"
             else:
                 sub_posts_str = str(sub_posts)
-            related_html += ('<div class="related-item">'
+            related_html += ('<<div class="related-item">'
                              '<span class="related-text">' + esc(sub["text"]) + '</span>'
                              '<span class="related-posts">' + chr(0x1F525) + ' ' + sub_posts_str + '</span>'
                              '</div>')
@@ -607,7 +691,7 @@ def _render_ranking_slide(i, data):
             posts_str = str(posts // 1000) + "k"
         else:
             posts_str = str(posts)
-        items_html += ('<li class="ranking-item">'
+        items_html += ('<<li class="ranking-item">'
                        '<span class="ranking-num">' + str(idx) + '</span>'
                        '<span class="ranking-text">' + text + '</span>'
                        '<span class="ranking-posts">' + posts_str + ' \u30dd\u30b9\u30c8</span>'
