@@ -1,8 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Aoaeola Archive Utilities v2.5
-- 4時間枠アーカイブ生成
+- 4時間枠アーカイブ生成（現在時刻を含む1枠のみ）
 - 背景グラデーション（トークンハッシュから決定的に生成）
 - 365日ローリングクリーンアップ
+- 直接HTMLファイルリンク
+NO f-string VERSION
 """
 import hashlib
 import os
@@ -14,7 +18,7 @@ from pathlib import Path
 JST = timezone(timedelta(hours=9))
 
 
-def get_color_from_token(token: str) -> dict:
+def get_color_from_token(token):
     """
     トークン文字列から決定的なHSLグラデーションを生成。
     同じトークンは常に同じ色を返す。
@@ -24,30 +28,28 @@ def get_color_from_token(token: str) -> dict:
     hue_start = int(h[0:4], 16) % 360
     hue_end = (hue_start + 40) % 360  # 40度ずらした補色系
     return {
-        "start": f"hsl({hue_start}, 70%, 45%)",
-        "end": f"hsl({hue_end}, 70%, 55%)",
+        "start": "hsl(" + str(hue_start) + ", 70%, 45%)",
+        "end": "hsl(" + str(hue_end) + ", 70%, 55%)",
         "hue_start": hue_start,
         "hue_end": hue_end,
     }
 
 
-def get_archive_path(base_dir: str, dt: datetime) -> Path:
+def get_archive_path(base_dir, dt):
     """archive/YYYY/MM/DD/HH-00.html のパスを生成"""
-    return Path(base_dir) / f"archive/{dt.year}/{dt.month:02d}/{dt.day:02d}/{dt.hour:02d}-00.html"
+    return Path(base_dir) / ("archive/" + str(dt.year) + "/" + "{:02d}".format(dt.month) + "/" + "{:02d}".format(dt.day) + "/" + "{:02d}".format(dt.hour) + "-00.html")
 
 
-def get_archive_hour_blocks(dt: datetime) -> list:
+def get_archive_hour_blocks(dt):
     """
-    指定日時を含む4時間枠の開始時刻リストを返す。
+    指定日時を含む4時間枠の開始時刻を1つのみ返す。
     0,4,8,12,16,20 のどれかに丸める。
     """
-    return [
-        dt.replace(hour=h, minute=0, second=0, microsecond=0)
-        for h in range(0, 24, 4)
-    ]
+    hour_block = (dt.hour // 4) * 4
+    return [dt.replace(hour=hour_block, minute=0, second=0, microsecond=0)]
 
 
-def cleanup_old_archives(base_dir: str, cutoff_days: int = 365) -> list:
+def cleanup_old_archives(base_dir, cutoff_days=365):
     """
     cutoff_days 日より古い archive/YYYY/MM/DD/ ディレクトリを削除。
     削除したパスのリストを返す。
@@ -87,10 +89,10 @@ def cleanup_old_archives(base_dir: str, cutoff_days: int = 365) -> list:
     return deleted
 
 
-def get_recent_archive_links(base_dir: str, days: int = 7) -> list:
+def get_recent_archive_links(base_dir, days=7):
     """
     過去N日分のアーカイブ日付リンク情報を返す。
-    各日付の最新HTMLファイルへの直接リンクを生成。
+    各日付のHTMLファイルへの直接リンクを生成。
     戻り値: [{"date_str": "06/17", "path": "archive/2026/06/17/16-00.html", "has_data": True}, ...]
     """
     archive_root = Path(base_dir).resolve() / "archive"
@@ -99,7 +101,7 @@ def get_recent_archive_links(base_dir: str, days: int = 7) -> list:
 
     for i in range(days):
         d = today - timedelta(days=i)
-        date_path = archive_root / f"{d.year}/{d.month:02d}/{d.day:02d}"
+        date_path = archive_root / (str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day))
         has_data = date_path.exists() and any(date_path.iterdir())
 
         # 日付ディレクトリ内のHTMLファイルを探す
@@ -113,12 +115,12 @@ def get_recent_archive_links(base_dir: str, days: int = 7) -> list:
                 pass
 
         if html_file:
-            path = f"archive/{d.year}/{d.month:02d}/{d.day:02d}/{html_file}"
+            path = "archive/" + str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day) + "/" + html_file
         else:
-            path = f"archive/{d.year}/{d.month:02d}/{d.day:02d}/"
+            path = "archive/" + str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day) + "/"
 
         links.append({
-            "date_str": f"{d.month:02d}/{d.day:02d}",
+            "date_str": "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day),
             "path": path,
             "has_data": has_data,
         })
@@ -126,6 +128,6 @@ def get_recent_archive_links(base_dir: str, days: int = 7) -> list:
     return links
 
 
-def generate_archive_title(dt: datetime) -> str:
+def generate_archive_title(dt):
     """アーカイブページの<title>を生成"""
-    return f"{dt.month}月{dt.day}日 {dt.hour}時台のトレンド｜Aoaeola"
+    return "{:02d}".format(dt.month) + "月" + "{:02d}".format(dt.day) + "日 " + "{:02d}".format(dt.hour) + "時台のトレンド｜Aoaeola"
