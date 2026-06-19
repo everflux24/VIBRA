@@ -50,6 +50,7 @@ from core.archive_utils import (
     get_recent_archive_links,
     get_adjacent_archive_links,
     get_archive_nav_html,
+    get_same_day_hour_nav_html,
     generate_archive_title,
 )
 
@@ -796,6 +797,9 @@ def save_archive(clusters, now, iso_time):
         else:
             next_link = '<span class="disabled">次へ ' + chr(0x2192) + '</span>'
 
+        # 同じ日の4時間枠ナビゲーション
+        hour_blocks_nav_html = get_same_day_hour_nav_html(OUTPUT_DIR, block_time)
+
         # 過去7日アーカイブナビゲーション
         archive_nav_html = get_archive_nav_html(OUTPUT_DIR, block_time, days=7)
 
@@ -816,6 +820,7 @@ def save_archive(clusters, now, iso_time):
         html = html.replace("{{generation_time}}", now.strftime("%Y-%m-%d %H:%M:%S"))
         html = html.replace("{{prev_link}}", prev_link)
         html = html.replace("{{next_link}}", next_link)
+        html = html.replace("{{hour_blocks_nav}}", hour_blocks_nav_html)
         html = html.replace("{{archive_nav}}", archive_nav_html)
 
         with open(archive_file, "w", encoding="utf-8") as f:
