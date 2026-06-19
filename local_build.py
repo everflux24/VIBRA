@@ -704,7 +704,7 @@ def generate_sitemap(base_url="https://everflux24.github.io/Aoaeola"):
             rel = html_file.relative_to(base)
             url = base_url + "/" + str(rel).replace("\\", "/")
             mtime = datetime.datetime.fromtimestamp(html_file.stat().st_mtime, tz=jst)
-            _add_sitemap_url(urlset, url, mtime, "never", "0.3")
+            _add_sitemap_url(urlset, url, mtime, "weekly", "0.5")
 
     tree = ET.ElementTree(urlset)
     sitemap_path = base / "sitemap.xml"
