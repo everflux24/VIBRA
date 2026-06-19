@@ -2,10 +2,10 @@ name: Build & Deploy Aoaeola
 
 on:
   repository_dispatch:
-    types: [uprobot-trigger] # cron-job.orgからの自動トリガーを受け取る設定
-  workflow_dispatch:        # GitHub画面から手動で実行する設定
+    types: [uprobot-trigger]
+  workflow_dispatch:
   push:
-    branches: [main]        # メインブランチに直接プッシュがあった時も実行する設定
+    branches: [main]
 
 permissions:
   pages: write
@@ -28,9 +28,8 @@ jobs:
           path: |
             _site/build_meta.json
             _site/archive
-          key: aoaeola-build-meta-${{ github.run_id }}
+          key: aoaeola-archive-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            aoaeola-build-meta-
             aoaeola-archive-
 
       - name: Setup Python
@@ -48,14 +47,15 @@ jobs:
           echo "$VIBRA_CORE_2" > core/hook_reason.py
           echo "✅ Core logic reconstructed from Secrets"
 
-      - name: Fetch existing archives from gh-pages
+      - name: Debug archive cache
         run: |
-          mkdir -p _site/archive
-          git fetch origin gh-pages --depth=1 || true
-          git checkout origin/gh-pages -- archive/ 2>/dev/null || true
-          if [ -d "archive" ]; then
-            cp -r archive/* _site/archive/ 2>/dev/null || true
-            rm -rf archive
+          echo "=== DEBUG: Archive cache status ==="
+          if [ -d "_site/archive" ]; then
+            echo "_site/archive exists"
+            find _site/archive -name "*.html" | wc -l
+            find _site/archive -name "*.html" | head -20
+          else
+            echo "_site/archive does not exist"
           fi
 
       - name: Build site
