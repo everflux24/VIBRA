@@ -48,6 +48,16 @@ jobs:
           echo "$VIBRA_CORE_2" > core/hook_reason.py
           echo "✅ Core logic reconstructed from Secrets"
 
+      - name: Fetch existing archives from gh-pages
+        run: |
+          mkdir -p _site/archive
+          git fetch origin gh-pages --depth=1 || true
+          git checkout origin/gh-pages -- archive/ 2>/dev/null || true
+          if [ -d "archive" ]; then
+            cp -r archive/* _site/archive/ 2>/dev/null || true
+            rm -rf archive
+          fi
+
       - name: Build site
         env:
           VIBRA_OUTPUT_DIR: _site
