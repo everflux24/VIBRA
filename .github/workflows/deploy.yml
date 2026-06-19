@@ -29,7 +29,9 @@ jobs:
             _site/build_meta.json
             _site/archive
           key: aoaeola-build-meta-${{ github.run_id }}
-          restore-keys: aoaeola-build-meta-
+          restore-keys: |
+            aoaeola-build-meta-
+            aoaeola-archive-
 
       - name: Setup Python
         uses: actions/setup-python@v5
