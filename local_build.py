@@ -898,8 +898,7 @@ def main():
 
     new_count = sum(1 for c in clusters if c["heat_status"]["is_new"])
     surge_count = sum(1 for c in clusters if c["heat_status"]["status"] == "surge")
-    print("
-Aoaeola v2.5 build complete")
+    print("\nAoaeola v2.5 build complete")
     print("  Clusters: " + str(len(clusters)))
     print("  New: " + str(new_count) + " | Surge: " + str(surge_count))
     print("  Total slides: " + str(len(slides)))
