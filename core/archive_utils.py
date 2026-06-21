@@ -315,6 +315,7 @@ def render_single_archive_page(base_dir, template_path, dt, content_cards_html):
     result = safe_replace(result, "ARCHIVE_NAV", archive_nav)
     result = safe_replace(result, "GENERATION_TIME",
         datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S"))
+    result = safe_replace(result, "HOME_URL", "https://everflux24.github.io/Aoaeola/")
 
     return result
 
