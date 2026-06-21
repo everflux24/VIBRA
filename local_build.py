@@ -4,7 +4,8 @@
 Aoaeola v2.5 - CoreToken Architecture + Interruption Layer + Heat Delta
                       + SEO Structured Data + Summary Quality Filter
                       + Archive System (4h blocks / 365d rolling / Gradient BG)
-                      NO f-string VERSION
+                      + A方式: 同日全アーカイブ再生成（SEO最適）
+NO f-string VERSION
 ============================================================================
 """
 
@@ -52,6 +53,11 @@ from core.archive_utils import (
     get_archive_nav_html,
     get_same_day_hour_nav_html,
     generate_archive_title,
+    safe_replace,
+    extract_content_cards,
+    render_single_archive_page,
+    save_archive_page,
+    regenerate_same_day_archives,
 )
 
 
@@ -119,21 +125,21 @@ AI_PATTERNS = [
 
 def clean_summary(summary):
     """生成AIによる安定的表現を除去し、サマリー品質を向上"""
-    if not summary or summary == "\u8a73\u7d30\u306a\u3057":
+    if not summary or summary == "詳細なし":
         return summary
     original = summary
     for pattern in AI_PATTERNS:
         summary = re.sub(pattern, '', summary)
-    summary = re.sub(r'\s*\u3088\s*\u3002', '\u3002', summary)
-    summary = re.sub(r'\s*\u3060\u3088\s*\u3002', '\u3002', summary)
-    summary = re.sub(r'\s*\u306a\u3093\u3060\s*\u3002', '\u3002', summary)
-    summary = re.sub(r'\s*\u307f\u305f\u3044\s*\u3002', '\u3002', summary)
-    summary = re.sub(r'\s*\u307f\u305f\u3044\u3067\u3059\s*\u3002', '\u3002', summary)
-    summary = re.sub(r'\s*\u3088\u3046\u3067\u3059\s*\u3002', '\u3002', summary)
+    summary = re.sub(r'\s*よ\s*。', '。', summary)
+    summary = re.sub(r'\s*だよ\s*。', '。', summary)
+    summary = re.sub(r'\s*なんだ\s*。', '。', summary)
+    summary = re.sub(r'\s*みたい\s*。', '。', summary)
+    summary = re.sub(r'\s*みたいです\s*。', '。', summary)
+    summary = re.sub(r'\s*ようです\s*。', '。', summary)
     summary = re.sub(r'\s+', ' ', summary)
     summary = summary.strip()
-    if summary.endswith('\u304c') or summary.endswith('\u3092') or summary.endswith('\u306b'):
-        summary = summary + '\u3002'
+    if summary.endswith('が') or summary.endswith('を') or summary.endswith('に'):
+        summary = summary + '。'
     if not summary.strip():
         summary = original
     return summary
@@ -156,11 +162,11 @@ class Slide:
 def parse_posts(post_str):
     if isinstance(post_str, int):
         return post_str
-    if not post_str or post_str in ("0", "\u8a73\u7d30\u306a\u3057"):
+    if not post_str or post_str in ("0", "詳細なし"):
         return 0
-    s = str(post_str).replace("\u30dd\u30b9\u30c8", "").replace(",", "").strip()
+    s = str(post_str).replace("ポスト", "").replace(",", "").strip()
     try:
-        return int(float(s.replace("\u4e07", "")) * 10000) if "\u4e07" in s else int(s)
+        return int(float(s.replace("万", "")) * 10000) if "万" in s else int(s)
     except:
         return 0
 
@@ -220,11 +226,11 @@ def inject_interruptions(slides):
     def _pickup_sort_key(slide):
         hs = slide.data.get("heat_status", {})
         if hs.get("is_new"):
-            return (0, -slide.data.get("heat", 0))  # 新着を最優先
+            return (0, -slide.data.get("heat", 0))
         elif hs.get("status") == "surge":
-            return (1, -slide.data.get("heat", 0))  # surgeを次
+            return (1, -slide.data.get("heat", 0))
         else:
-            return (2, -slide.data.get("heat", 0))  # その他（heat補完）
+            return (2, -slide.data.get("heat", 0))
 
     pickup_slides.sort(key=_pickup_sort_key)
 
@@ -348,11 +354,11 @@ def esc(text):
 # ============================================================
 def generate_top_footer_archive_links(now, output_dir):
     """過去7日のアーカイブリンクをフッターとして生成"""
-    links = get_recent_archive_links(output_dir, days=7)
+    links = get_recent_archive_links(output_dir, now, days=7)
     if not links:
         return ""
     html_parts = ['<footer class="archive-footer">']
-    html_parts.append('<div class="archive-footer-label">\u904e\u53bb7\u65e5\u306e\u30a2\u30fc\u30ab\u30a4\u30d6</div>')
+    html_parts.append('<div class="archive-footer-label">過去7日のアーカイブ</div>')
     html_parts.append('<div class="archive-footer-links">')
     for link in links:
         cls = "archive-footer-link" if link["has_data"] else "archive-footer-link empty"
@@ -386,9 +392,9 @@ def generate_app_html(slides, out_path=None):
     iso_time = now.isoformat()
     ogp_image_url = "https://everflux24.github.io/Aoaeola/ogp-default.png?v=" + version
 
-    page_title = "Aoaeola\uff5c\u3086\u308b\u304f\u77b0\u3081\u308bX\u30c8\u30ec\u30f3\u30c9"
-    page_desc = "\u6687\u3064\u3076\u3057\u306e\u3064\u3044\u3067\u306b\u3001\u4e16\u306e\u4e2d\u306e\u7a7a\u6c17\u304c\u306a\u3093\u3068\u306a\u304f\u308f\u304b\u308b\u3002X\u3067\u8a71\u984c\u306e\u30cb\u30e5\u30fc\u30b9\u3084\u30c8\u30ec\u30f3\u30c9\u309230\u5206\u3054\u3068\u306b\u307e\u3068\u3081\u308b\u3001\u3086\u308b\u304f\u77b0\u3081\u308b\u305f\u3081\u306e\u30b5\u30fc\u30d3\u30b9\u3067\u3059\u3002"
-    ogp_desc = "\u30cb\u30e5\u30fc\u30b9\u3084\u6d41\u884c\u306e\u201c\u307f\u3093\u306a\u306e\u53cd\u5fdc\u201d\u3092\u3001\u7e26\u30b9\u30ef\u30a4\u30d7\u3067\u6c17\u8efd\u306b\u30c1\u30a7\u30c3\u30af\u3002\u5c11\u3057\u7a7a\u3044\u305f\u6642\u9593\u306e\u6687\u3064\u3076\u3057\u306b\u3002"
+    page_title = "Aoaeola｜ゆるく瞰めるXトレンド"
+    page_desc = "暇つぶしのついでに、世の中の空気がなんとなくわかる。Xで話題のニュースやトレンドを30分ごとにまとめる、ゆるく瞰めるためのサービスです。"
+    ogp_desc = "ニュースや流行の“みんなの反応”を、縦スワイプで気軽にチェック。少し空いた時間の暇つぶしに。"
 
     json_ld = generate_json_ld(slides, iso_time, page_title, page_desc)
 
@@ -519,11 +525,10 @@ def generate_app_html(slides, out_path=None):
     parts.append(FAVICON_SVG)
     parts.append('<title>' + esc(page_title) + '</title>' + css)
     parts.append('<script type="application/ld+json">' + json_ld + '</script>')
-    parts.append('</head><body><h1 class="visually-hidden">\u4eca\u65e5\u306e\u65e5\u672c\u30c8\u30ec\u30f3\u30c9\u307e\u3068\u3081</h1>')
+    parts.append('</head><body><h1 class="visually-hidden">今日の日本トレンドまとめ</h1>')
     # v2.5: Archive footer as last slide
     archive_footer_html = generate_top_footer_archive_links(now, OUTPUT_DIR)
     if archive_footer_html:
-        # footer を slide としてレンダリング（スワイプ対応）
         footer_slide = ('<article class="slide archive-footer-slide" aria-label="アーカイブフッター">'
                        + archive_footer_html
                        + '</article>')
@@ -550,7 +555,7 @@ def _render_topic_slide(i, cluster, colors, time_str, iso_time, is_h3=False):
     hs = cluster.get("heat_status", {})
     badge_color = hs.get("badge_color", "#ffea00")
     is_new = hs.get("is_new", False)
-    new_tag = '<span class="new-tag">\u65b0\u7740</span>' if is_new else ''
+    new_tag = '<span class="new-tag">新着</span>' if is_new else ''
     c_core = cluster.get('core_token', '')
     rep_title = rep.get('title', '')
     image_url = rep.get('image', '') if c_core in rep_title else ''
@@ -563,16 +568,16 @@ def _render_topic_slide(i, cluster, colors, time_str, iso_time, is_h3=False):
                    '<div class="bg-gradient" aria-hidden="true"></div>')
     posts_num = cluster['heat']
     if posts_num >= 10000:
-        posts_str = str(round(posts_num / 10000, 1)) + "\u4e07" if posts_num % 10000 != 0 else str(posts_num // 10000) + "\u4e07"
+        posts_str = str(round(posts_num / 10000, 1)) + "万" if posts_num % 10000 != 0 else str(posts_num // 10000) + "万"
     else:
         posts_str = "{:,}".format(posts_num)
     related_html = ""
     if cluster.get('sub_reasons'):
-        related_html = '<div class="related"><div class="related-label">\u95a2\u9023</div>'
+        related_html = '<div class="related"><div class="related-label">関連</div>'
         for sub in cluster['sub_reasons']:
             sub_posts = sub['posts']
             if sub_posts >= 10000:
-                sub_posts_str = str(sub_posts // 10000) + "\u4e07"
+                sub_posts_str = str(sub_posts // 10000) + "万"
             elif sub_posts >= 1000:
                 sub_posts_str = str(sub_posts // 1000) + "k"
             else:
@@ -585,20 +590,20 @@ def _render_topic_slide(i, cluster, colors, time_str, iso_time, is_h3=False):
     parts = []
     parts.append('<article class="slide" aria-labelledby="heading-' + str(i) + '">')
     parts.append(bg_html)
-    parts.append('<time datetime="' + esc(iso_time) + '" class="update-badge">' + chr(0x1F504) + ' ' + esc(time_str) + ' \u66f4\u65b0</time>')
+    parts.append('<time datetime="' + esc(iso_time) + '" class="update-badge">' + chr(0x1F504) + ' ' + esc(time_str) + ' 更新</time>')
     parts.append('<div class="content">')
     parts.append('<span class="hook-badge" role="text" style="background: ' + badge_color + ';">' + esc(hook_text) + '</span>')
     tag_name = "h3" if is_h3 else "h2"
     parts.append('<' + tag_name + ' id="heading-' + str(i) + '" class="title">' + esc(rep['title']) + '</' + tag_name + '>')
     parts.append('<p class="summary">' + esc(rep['summary']) + '</p>')
-    parts.append('<footer class="meta" aria-label="\u30bd\u30fc\u30b7\u30e3\u30eb\u53cd\u97ff">')
+    parts.append('<footer class="meta" aria-label="ソーシャル反響">')
     parts.append('<span class="meta-icon">' + chr(0x1F525) + '</span>')
-    parts.append('<span>' + posts_str + ' \u30dd\u30b9\u30c8' + new_tag + '</span>')
+    parts.append('<span>' + posts_str + ' ポスト' + new_tag + '</span>')
     parts.append('</footer>')
     parts.append(related_html)
     parts.append('</div>')
-    parts.append('<div class="disclaimer" aria-hidden="true">\u203b\u81ea\u52d5\u53d6\u5f97\u30fb\u81ea\u52d5\u8981\u7d04\u3002\u80cc\u666f\u30df\u30b9\u30de\u30c3\u30c1\u3001\u539f\u6587\u306e\u30cb\u30e5\u30a2\u30f3\u30b9\u304c\u640d\u306a\u308f\u308c\u308b\u5834\u5408\u304c\u3042\u308a\u3001\u5185\u5bb9\u306e\u6b63\u78ba\u6027\u3092\u4fdd\u8a3c\u3059\u308b\u3082\u306e\u3067\u306f\u3042\u308a\u307e\u305b\u3093\u3002</div>')
-    parts.append('<div class="hint" aria-hidden="true">SWIPE UP \u2193</div>')
+    parts.append('<div class="disclaimer" aria-hidden="true">※自動取得・自動要約。背景ミスマッチ、原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>')
+    parts.append('<div class="hint" aria-hidden="true">SWIPE UP ↓</div>')
     parts.append('</article>')
     return "".join(parts)
 
@@ -614,14 +619,14 @@ def _render_interruption_slide(i, data):
 
 
 def _render_ranking_slide(i, data):
-    title = esc(data.get("title", "\u4eba\u6c17\u30e9\u30f3\u30ad\u30f3\u30b0"))
+    title = esc(data.get("title", "人気ランキング"))
     items = data.get("items", [])
     items_html = ""
     for idx, item in enumerate(items[:5], 1):
         text = esc(item.get("text", ""))
         posts = item.get("posts", 0)
         if posts >= 10000:
-            posts_str = str(posts // 10000) + "\u4e07"
+            posts_str = str(posts // 10000) + "万"
         elif posts >= 1000:
             posts_str = str(posts // 1000) + "k"
         else:
@@ -629,7 +634,7 @@ def _render_ranking_slide(i, data):
         items_html += ('<li class="ranking-item">'
                        '<span class="ranking-num">' + str(idx) + '</span>'
                        '<span class="ranking-text">' + text + '</span>'
-                       '<span class="ranking-posts">' + posts_str + ' \u30dd\u30b9\u30c8</span>'
+                       '<span class="ranking-posts">' + posts_str + ' ポスト</span>'
                        '</li>')
     parts = []
     parts.append('<article class="slide interruption-slide ranking-bg" aria-labelledby="ranking-heading-' + str(i) + '">')
@@ -638,8 +643,8 @@ def _render_ranking_slide(i, data):
     parts.append('<h2 id="ranking-heading-' + str(i) + '" class="interruption-title">' + title + '</h2>')
     parts.append('<ul class="ranking-list">' + items_html + '</ul>')
     parts.append('</div>')
-    parts.append('<div class="disclaimer" aria-hidden="true">\u203b\u81ea\u52d5\u53d6\u5f97\u30fb\u81ea\u52d5\u8981\u7d04\u3002\u539f\u6587\u306e\u30cb\u30e5\u30a2\u30f3\u30b9\u304c\u640d\u306a\u308f\u308c\u308b\u5834\u5408\u304c\u3042\u308a\u3001\u5185\u5bb9\u306e\u6b63\u78ba\u6027\u3092\u4fdd\u8a3c\u3059\u308b\u3082\u306e\u3067\u306f\u3042\u308a\u307e\u305b\u3093\u3002</div>')
-    parts.append('<div class="hint" aria-hidden="true">SWIPE UP \u2193</div>')
+    parts.append('<div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>')
+    parts.append('<div class="hint" aria-hidden="true">SWIPE UP ↓</div>')
     parts.append('</article>')
     return "".join(parts)
 
@@ -648,7 +653,7 @@ def _render_promo_slide(i, data):
     badge = esc(data.get("badge", "Sponsored"))
     title = esc(data.get("title", ""))
     description = esc(data.get("description", ""))
-    cta = esc(data.get("cta", "\u8a73\u3057\u304f\u898b\u308b"))
+    cta = esc(data.get("cta", "詳しく見る"))
     cta_url = esc(data.get("cta_url", "#"))
     parts = []
     parts.append('<article class="slide interruption-slide promo-bg" aria-labelledby="promo-heading-' + str(i) + '">')
@@ -658,8 +663,8 @@ def _render_promo_slide(i, data):
     parts.append('<p class="interruption-desc">' + description + '</p>')
     parts.append('<a href="' + cta_url + '" class="interruption-cta" target="_blank" rel="noopener noreferrer">' + cta + '</a>')
     parts.append('</div>')
-    parts.append('<div class="disclaimer" aria-hidden="true">\u203b\u81ea\u52d5\u53d6\u5f97\u30fb\u81ea\u52d5\u8981\u7d04\u3002\u539f\u6587\u306e\u30cb\u30e5\u30a2\u30f3\u30b9\u304c\u640d\u306a\u308f\u308c\u308b\u5834\u5408\u304c\u3042\u308a\u3001\u5185\u5bb9\u306e\u6b63\u78ba\u6027\u3092\u4fdd\u8a3c\u3059\u308b\u3082\u306e\u3067\u306f\u3042\u308a\u307e\u305b\u3093\u3002</div>')
-    parts.append('<div class="hint" aria-hidden="true">SWIPE UP \u2193</div>')
+    parts.append('<div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>')
+    parts.append('<div class="hint" aria-hidden="true">SWIPE UP ↓</div>')
     parts.append('</article>')
     return "".join(parts)
 
@@ -668,7 +673,7 @@ def _render_announcement_slide(i, data):
     badge = esc(data.get("badge", "News"))
     title = esc(data.get("title", ""))
     description = esc(data.get("description", ""))
-    cta = esc(data.get("cta", "\u78ba\u8a8d\u3059\u308b"))
+    cta = esc(data.get("cta", "確認する"))
     cta_url = esc(data.get("cta_url", "#"))
     parts = []
     parts.append('<article class="slide interruption-slide" style="background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%);" aria-labelledby="announce-heading-' + str(i) + '">')
@@ -678,8 +683,8 @@ def _render_announcement_slide(i, data):
     parts.append('<p class="interruption-desc">' + description + '</p>')
     parts.append('<a href="' + cta_url + '" class="interruption-cta" target="_blank" rel="noopener noreferrer">' + cta + '</a>')
     parts.append('</div>')
-    parts.append('<div class="disclaimer" aria-hidden="true">\u203b\u81ea\u52d5\u53d6\u5f97\u30fb\u81ea\u52d5\u8981\u7d04\u3002\u539f\u6587\u306e\u30cb\u30e5\u30a2\u30f3\u30b9\u304c\u640d\u306a\u308f\u308c\u308b\u5834\u5408\u304c\u3042\u308a\u3001\u5185\u5bb9\u306e\u6b63\u78ba\u6027\u3092\u4fdd\u8a3c\u3059\u308b\u3082\u306e\u3067\u306f\u3042\u308a\u307e\u305b\u3093\u3002</div>')
-    parts.append('<div class="hint" aria-hidden="true">SWIPE UP \u2193</div>')
+    parts.append('<div class="disclaimer" aria-hidden="true">※自動取得・自動要約。原文のニュアンスが損なわれる場合があり、内容の正確性を保証するものではありません。</div>')
+    parts.append('<div class="hint" aria-hidden="true">SWIPE UP ↓</div>')
     parts.append('</article>')
     return "".join(parts)
 
@@ -702,7 +707,7 @@ def generate_sitemap(base_url="https://everflux24.github.io/Aoaeola"):
     if archive_root.exists():
         for html_file in sorted(archive_root.rglob("*.html")):
             rel = html_file.relative_to(base)
-            url = base_url + "/" + str(rel).replace("\\", "/")
+            url = base_url + "/" + str(rel).replace("\", "/")
             mtime = datetime.datetime.fromtimestamp(html_file.stat().st_mtime, tz=jst)
             _add_sitemap_url(urlset, url, mtime, "weekly", "0.5")
 
@@ -710,7 +715,6 @@ def generate_sitemap(base_url="https://everflux24.github.io/Aoaeola"):
     sitemap_path = base / "sitemap.xml"
     tree.write(sitemap_path, encoding="utf-8", xml_declaration=True)
 
-    # URL数をカウント
     url_count = len(list(urlset.iter(f"{{{SITEMAP_NS}}}url")))
     print("Generated sitemap.xml: " + str(url_count) + " URLs")
     print("  - Top page: 1")
@@ -731,7 +735,10 @@ def _add_sitemap_url(parent, loc, lastmod, changefreq, priority):
 # robots.txt Generator
 # ============================================================
 def generate_robots_txt(base_url="https://everflux24.github.io/Aoaeola"):
-    robots = "User-agent: *\nAllow: /\n\nSitemap: " + base_url + "/sitemap.xml"
+    robots = "User-agent: *
+Allow: /
+
+Sitemap: " + base_url + "/sitemap.xml"
     robots_path = os.path.join(OUTPUT_DIR, "robots.txt")
     with open(robots_path, "w", encoding="utf-8") as f:
         f.write(robots)
@@ -739,34 +746,24 @@ def generate_robots_txt(base_url="https://everflux24.github.io/Aoaeola"):
 
 
 # ============================================================
-# Archive Generator (v2.5)
+# Archive Generator (v2.5 - A方式)
 # ============================================================
 def save_archive(clusters, now, iso_time):
-    """4時間枠アーカイブを生成"""
-    # OUTPUT_DIR を確実に作成
+    """
+    4時間枠アーカイブを生成（A方式：同日全再生成）。
+    新規アーカイブ生成時に、同日の既存アーカイブもナビゲーションを更新して再生成する。
+    """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    # テンプレート存在チェック
     template_path = os.path.join(os.path.dirname(__file__), "templates", "archive_page.html")
     if not os.path.exists(template_path):
         print("WARNING: Archive template not found: " + template_path)
         print("  Skipping archive generation.")
         return
 
-    for block_time in get_archive_hour_blocks(now):
-        archive_file = get_archive_path(OUTPUT_DIR, block_time)
-        archive_file.parent.mkdir(parents=True, exist_ok=True)
-
-        # 最もヒートの高いクラスターのトークンから色を決定
-        core_token = clusters[0]["core_token"] if clusters else "trend"
-        colors = get_color_from_token(core_token)
-
-        # テンプレート読み込み
-        with open(template_path, "r", encoding="utf-8") as f:
-            template = f.read()
-
-        # コンテンツカード生成
-        content_cards = ""
+    # コンテンツカード生成関数
+    def generate_content_cards(dt):
+        content = ""
         for c in clusters:
             rep = c.get("rep", {})
             title = rep.get("title", "")
@@ -776,57 +773,23 @@ def save_archive(clusters, now, iso_time):
                 posts_str = str(round(posts / 10000, 1)) + "万"
             else:
                 posts_str = "{:,}".format(posts)
-            content_cards += (
+            content += (
                 '<article class="card">'
                 '<h2>' + esc(title) + '</h2>'
                 '<p>' + esc(summary) + '</p>'
                 '<div class="meta">' + chr(0x1F525) + ' ' + posts_str + ' ポスト</div>'
                 '</article>'
             )
+        return content
 
-        # 前後4時間枠リンク生成
-        adjacent = get_adjacent_archive_links(OUTPUT_DIR, block_time)
-        if adjacent["prev"]:
-            prev_link = ('<a href="' + adjacent["prev"]["url"] + '">'
-                        + chr(0x2190) + ' ' + adjacent["prev"]["text"] + '</a>')
-        else:
-            prev_link = '<span class="disabled">' + chr(0x2190) + ' 前へ</span>'
-        if adjacent["next"]:
-            next_link = ('<a href="' + adjacent["next"]["url"] + '">'
-                        + adjacent["next"]["text"] + ' ' + chr(0x2192) + '</a>')
-        else:
-            next_link = '<span class="disabled">次へ ' + chr(0x2192) + '</span>'
+    for block_time in get_archive_hour_blocks(now):
+        # A方式：同日全アーカイブ再生成
+        updated_files = regenerate_same_day_archives(
+            OUTPUT_DIR, template_path, block_time, generate_content_cards
+        )
 
-        # 同じ日の4時間枠ナビゲーション
-        hour_blocks_nav_html = get_same_day_hour_nav_html(OUTPUT_DIR, block_time)
-
-        # 過去7日アーカイブナビゲーション
-        archive_nav_html = get_archive_nav_html(OUTPUT_DIR, block_time, days=7)
-
-        # テンプレートレンダリング
-        html = template.replace("{{archive_title}}", generate_archive_title(block_time))
-        html = html.replace("{{canonical_url}}",
-            "https://everflux24.github.io/Aoaeola/archive/" +
-            str(block_time.year) + "/" +
-            "{:02d}".format(block_time.month) + "/" +
-            "{:02d}".format(block_time.day) + "/" +
-            "{:02d}".format(block_time.hour) + "-00.html")
-        html = html.replace("{{gradient_start}}", colors["start"])
-        html = html.replace("{{gradient_end}}", colors["end"])
-        html = html.replace("{{hue_start}}", str(colors["hue_start"]))
-        html = html.replace("{{iso_datetime}}", block_time.isoformat())
-        html = html.replace("{{display_datetime}}", block_time.strftime("%Y年%m月%d日 %H:%M"))
-        html = html.replace("{{content_cards}}", content_cards)
-        html = html.replace("{{generation_time}}", now.strftime("%Y-%m-%d %H:%M:%S"))
-        html = html.replace("{{prev_link}}", prev_link)
-        html = html.replace("{{next_link}}", next_link)
-        html = html.replace("{{hour_blocks_nav}}", hour_blocks_nav_html)
-        html = html.replace("{{archive_nav}}", archive_nav_html)
-
-        with open(archive_file, "w", encoding="utf-8") as f:
-            f.write(html)
-
-    print("Archive generated: " + str(len(list(get_archive_hour_blocks(now)))) + " files")
+    print("Archive generated: " + str(len(list(get_archive_hour_blocks(now)))) + " new blocks, " +
+          str(len(updated_files)) + " total files updated")
 
 
 # ============================================================
@@ -864,7 +827,7 @@ def parse_html(html):
         title = (it.get("title") or "").strip()
         if not title:
             continue
-        summary = (it.get("summary") or "\u8a73\u7d30\u306a\u3057").strip()
+        summary = (it.get("summary") or "詳細なし").strip()
         summary = clean_summary(summary)
         posts = it.get("tweetCount", 0)
         image = ""
@@ -938,7 +901,8 @@ def main():
 
     new_count = sum(1 for c in clusters if c["heat_status"]["is_new"])
     surge_count = sum(1 for c in clusters if c["heat_status"]["status"] == "surge")
-    print("\nAoaeola v2.5 build complete")
+    print("
+Aoaeola v2.5 build complete")
     print("  Clusters: " + str(len(clusters)))
     print("  New: " + str(new_count) + " | Surge: " + str(surge_count))
     print("  Total slides: " + str(len(slides)))
