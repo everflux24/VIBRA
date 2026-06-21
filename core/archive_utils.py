@@ -226,6 +226,21 @@ def get_adjacent_archive_links(base_dir, dt):
 
     return links
 
+
+
+def get_archive_pager_html(adj_links):
+    """前後4時間枠ナビゲーションHTMLを生成"""
+    html_parts = []
+    if adj_links["prev"]:
+        html_parts.append('<a href="' + adj_links["prev"]["url"] + '" class="archive-pager-link prev">← ' + adj_links["prev"]["text"] + '</a>')
+    else:
+        html_parts.append('<span class="archive-pager-link prev disabled">← 前へ</span>')
+    if adj_links["next"]:
+        html_parts.append('<a href="' + adj_links["next"]["url"] + '" class="archive-pager-link next">' + adj_links["next"]["text"] + ' →</a>')
+    else:
+        html_parts.append('<span class="archive-pager-link next disabled">次へ →</span>')
+    return "".join(html_parts)
+
 def get_archive_nav_html(base_dir, current_dt, days=7):
     """
     アーカイブページ内に表示する過去N日のアーカイブナビゲーションHTMLを生成。
