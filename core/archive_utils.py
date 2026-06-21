@@ -173,10 +173,35 @@ def get_same_day_hour_nav_html(base_dir, current_dt):
     return "".join(html_parts)
 
 
+def _get_relative_path(from_dt, to_dt, to_hour):
+    """
+    from_dt のアーカイブページから to_dt のアーカイブページへの相対パスを生成。
+    例: 2026/06/22/04-00.html から 2026/06/22/00-00.html へ → "00-00.html"
+    例: 2026/06/22/04-00.html から 2026/06/21/20-00.html へ → "../21/20-00.html"
+    """
+    fy, fm, fd = from_dt.year, from_dt.month, from_dt.day
+    ty, tm, td = to_dt.year, to_dt.month, to_dt.day
+
+    # 同じ日
+    if fy == ty and fm == tm and fd == td:
+        return "{:02d}-00.html".format(to_hour)
+
+    # 同じ月
+    if fy == ty and fm == tm:
+        return "../{:02d}/{:02d}-00.html".format(td, to_hour)
+
+    # 同じ年
+    if fy == ty:
+        return "../../{:02d}/{:02d}/{:02d}-00.html".format(tm, td, to_hour)
+
+    # 別年
+    return "../../../{:04d}/{:02d}/{:02d}/{:02d}-00.html".format(ty, tm, td, to_hour)
+
+
 def get_adjacent_archive_links(base_dir, dt):
     """
     指定日時の前後4時間枠のアーカイブリンクを生成。
-    ファイルが存在する場合のみリンクを返す。
+    ファイルが存在する場合のみリンクを返す。相対パスを使用。
     """
     links = {"prev": None, "next": None}
 
@@ -192,12 +217,8 @@ def get_adjacent_archive_links(base_dir, dt):
         "{:02d}-00.html".format(prev_hour)
     )
     if os.path.exists(prev_path):
-        rel_path = ("archive/" + str(prev_dt.year) + "/" +
-                    "{:02d}".format(prev_dt.month) + "/" +
-                    "{:02d}".format(prev_dt.day) + "/" +
-                    "{:02d}".format(prev_hour) + "-00.html")
         links["prev"] = {
-            "url": rel_path,
+            "url": _get_relative_path(dt, prev_dt, prev_hour),
             "text": ("{:02d}".format(prev_dt.month) + "/" +
                      "{:02d}".format(prev_dt.day) + " " +
                      "{:02d}".format(prev_hour) + ":00")
@@ -215,12 +236,8 @@ def get_adjacent_archive_links(base_dir, dt):
         "{:02d}-00.html".format(next_hour)
     )
     if os.path.exists(next_path):
-        rel_path = ("archive/" + str(next_dt.year) + "/" +
-                    "{:02d}".format(next_dt.month) + "/" +
-                    "{:02d}".format(next_dt.day) + "/" +
-                    "{:02d}".format(next_hour) + "-00.html")
         links["next"] = {
-            "url": rel_path,
+            "url": _get_relative_path(dt, next_dt, next_hour),
             "text": ("{:02d}".format(next_dt.month) + "/" +
                      "{:02d}".format(next_dt.day) + " " +
                      "{:02d}".format(next_hour) + ":00")
