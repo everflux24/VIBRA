@@ -10,6 +10,7 @@ on:
 permissions:
   pages: write
   id-token: write
+  contents: write
 
 concurrency:
   group: aoaeola-pages
@@ -21,16 +22,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Restore build meta and archive cache
-        uses: actions/cache@v4
         with:
-          path: |
-            _site/build_meta.json
-            _site/archive
-          key: aoaeola-archive-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: |
-            aoaeola-archive-
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -47,21 +40,31 @@ jobs:
           echo "$VIBRA_CORE_2" > core/hook_reason.py
           echo "✅ Core logic reconstructed from Secrets"
 
-      - name: Debug archive cache
-        run: |
-          echo "=== DEBUG: Archive cache status ==="
-          if [ -d "_site/archive" ]; then
-            echo "_site/archive exists"
-            find _site/archive -name "*.html" | wc -l
-            find _site/archive -name "*.html" | head -20
-          else
-            echo "_site/archive does not exist"
-          fi
-
       - name: Build site
         env:
           VIBRA_OUTPUT_DIR: _site
         run: python local_build.py
+
+      - name: Copy new archives to repository
+        run: |
+          if [ -d "_site/archive" ]; then
+            mkdir -p archive
+            cp -r _site/archive/* archive/ 2>/dev/null || true
+            echo "✅ Archives copied to repository"
+          fi
+
+      - name: Commit archives if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add archive/
+          if ! git diff --cached --quiet; then
+            git commit -m "Update archives [skip ci]"
+            git push origin main
+            echo "✅ Archives committed to main branch"
+          else
+            echo "No archive changes to commit"
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
