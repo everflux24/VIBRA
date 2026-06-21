@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          clean: false  # ← 前回のビルド成果物（archive/）を保持
+          clean: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -40,6 +40,14 @@ jobs:
           echo "$VIBRA_CORE_1" > core/token_cluster.py
           echo "$VIBRA_CORE_2" > core/hook_reason.py
           echo "✅ Core logic reconstructed from Secrets"
+
+      - name: Restore archives from repository
+        run: |
+          if [ -d "archive" ]; then
+            mkdir -p _site/archive
+            cp -r archive/* _site/archive/ 2>/dev/null || true
+            echo "✅ Archives restored to _site/archive"
+          fi
 
       - name: Build site
         env:
