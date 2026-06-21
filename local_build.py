@@ -735,10 +735,7 @@ def _add_sitemap_url(parent, loc, lastmod, changefreq, priority):
 # robots.txt Generator
 # ============================================================
 def generate_robots_txt(base_url="https://everflux24.github.io/Aoaeola"):
-    robots = "User-agent: *
-Allow: /
-
-Sitemap: " + base_url + "/sitemap.xml"
+    robots = "User-agent: *\nAllow: /\n\nSitemap: " + base_url + "/sitemap.xml"
     robots_path = os.path.join(OUTPUT_DIR, "robots.txt")
     with open(robots_path, "w", encoding="utf-8") as f:
         f.write(robots)
