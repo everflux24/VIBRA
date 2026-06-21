@@ -247,3 +247,129 @@ def get_archive_nav_html(base_dir, current_dt, days=7):
             html_parts.append('<span class="archive-nav-link empty">' + link["date_str"] + '</span>')
     html_parts.append('</div></nav>')
     return "".join(html_parts)
+
+
+
+def safe_replace(template, key, value):
+    """<!--KEY-->形式のプレースホルダーを安全に置換"""
+    return template.replace("<!--" + key + "-->", value)
+
+
+def extract_content_cards(html):
+    """HTMLから content-cards 部分を抽出"""
+    match = re.search(r'<main class="content-cards">(.*?)</main>', html, re.S)
+    if match:
+        return match.group(1).strip()
+    return ""
+
+
+def render_single_archive_page(base_dir, template_path, dt, content_cards_html):
+    """
+    単一アーカイブページをレンダリング（安全な置換）。
+    """
+    with open(template_path, "r", encoding="utf-8") as f:
+        template = f.read()
+
+    adj = get_adjacent_archive_links(base_dir, dt)
+    pager = get_archive_pager_html(adj)
+    hour_nav = get_same_day_hour_nav_html(base_dir, dt)
+    archive_nav = get_archive_nav_html(base_dir, dt, days=7)
+
+    result = template
+    result = safe_replace(result, "ARCHIVE_TITLE", generate_archive_title(dt))
+    result = safe_replace(result, "CANONICAL_URL",
+        "https://everflux24.github.io/Aoaeola/archive/" +
+        str(dt.year) + "/" + "{:02d}".format(dt.month) + "/" +
+        "{:02d}".format(dt.day) + "/" + "{:02d}".format(dt.hour) + "-00.html")
+    result = safe_replace(result, "DISPLAY_DATETIME",
+        str(dt.year) + "年" + "{:02d}".format(dt.month) + "月" +
+        "{:02d}".format(dt.day) + "日 " + "{:02d}".format(dt.hour) + ":00")
+    result = safe_replace(result, "ISO_DATETIME", dt.isoformat())
+    result = safe_replace(result, "PAGER_TOP", pager)
+    result = safe_replace(result, "HOUR_BLOCKS_NAV", hour_nav)
+    result = safe_replace(result, "CONTENT_CARDS", content_cards_html)
+    result = safe_replace(result, "PAGER_BOTTOM", pager)
+    result = safe_replace(result, "ARCHIVE_NAV", archive_nav)
+    result = safe_replace(result, "GENERATION_TIME",
+        datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S"))
+
+    return result
+
+
+def save_archive_page(base_dir, dt, html_content):
+    """アーカイブページをファイルに保存"""
+    path = get_archive_path(base_dir, dt)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(html_content)
+    return str(path)
+
+
+def regenerate_same_day_archives(base_dir, template_path, current_dt, content_generator):
+    """
+    A方式核心：同日全アーカイブ再生成 + 既存コンテンツ保持 + 前後日隣接枠更新。
+    新規アーカイブ生成時に、同日の既存アーカイブもナビゲーションを更新して再生成する。
+    """
+    updated_files = []
+
+    # 1. 同日の全4時間枠をスキャン
+    same_day_hours = []
+    for h in range(0, 24, 4):
+        file_path = os.path.join(base_dir, "archive", str(current_dt.year),
+                                 "{:02d}".format(current_dt.month), "{:02d}".format(current_dt.day),
+                                 "{:02d}-00.html".format(h))
+        if os.path.exists(file_path):
+            same_day_hours.append(h)
+
+    current_hour = current_dt.hour
+    if current_hour not in same_day_hours:
+        same_day_hours.append(current_hour)
+    same_day_hours = sorted(set(same_day_hours))
+
+    # 2. 同日の全枠を再生成（既存コンテンツを保持）
+    for h in same_day_hours:
+        dt = current_dt.replace(hour=h, minute=0, second=0, microsecond=0)
+        file_path = get_archive_path(base_dir, dt)
+
+        if file_path.exists():
+            with open(file_path, "r", encoding="utf-8") as f:
+                existing_html = f.read()
+            content = extract_content_cards(existing_html)
+        else:
+            content = content_generator(dt)
+
+        html = render_single_archive_page(base_dir, template_path, dt, content)
+        path = save_archive_page(base_dir, dt, html)
+        updated_files.append(path)
+
+    # 3. 前日の最後の枠を更新（次へリンクを更新するため）
+    prev_dt = current_dt - timedelta(days=1)
+    prev_hour = 20
+    prev_path = os.path.join(base_dir, "archive", str(prev_dt.year),
+                             "{:02d}".format(prev_dt.month), "{:02d}".format(prev_dt.day),
+                             "{:02d}-00.html".format(prev_hour))
+    if os.path.exists(prev_path):
+        dt = prev_dt.replace(hour=prev_hour, minute=0, second=0, microsecond=0)
+        with open(prev_path, "r", encoding="utf-8") as f:
+            existing_html = f.read()
+        content = extract_content_cards(existing_html)
+        html = render_single_archive_page(base_dir, template_path, dt, content)
+        path = save_archive_page(base_dir, dt, html)
+        updated_files.append(path)
+
+    # 4. 翌日の最初の枠を更新（前へリンクを更新するため）
+    next_dt = current_dt + timedelta(days=1)
+    next_hour = 0
+    next_path = os.path.join(base_dir, "archive", str(next_dt.year),
+                             "{:02d}".format(next_dt.month), "{:02d}".format(next_dt.day),
+                             "{:02d}-00.html".format(next_hour))
+    if os.path.exists(next_path):
+        dt = next_dt.replace(hour=next_hour, minute=0, second=0, microsecond=0)
+        with open(next_path, "r", encoding="utf-8") as f:
+            existing_html = f.read()
+        content = extract_content_cards(existing_html)
+        html = render_single_archive_page(base_dir, template_path, dt, content)
+        path = save_archive_page(base_dir, dt, html)
+        updated_files.append(path)
+
+    return updated_files
