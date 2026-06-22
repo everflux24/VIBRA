@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Aoaeola Archive Utilities v2.5.1
+Aoaeola Archive Utilities v2.5.3
 - 4時間枠アーカイブ生成（現在時刻を含む1枠のみ）
 - 背景グラデーション（トークンハッシュから決定的に生成）
 - 365日ローリングクリーンアップ
 - 直接HTMLファイルリンク
 - A方式：同日全アーカイブ再生成（SEO最適）
+- 相対パスナビゲーション
 NO f-string VERSION
 """
 import hashlib
@@ -88,100 +89,22 @@ def cleanup_old_archives(base_dir, cutoff_days=365):
     return deleted
 
 
-def _get_relative_path_to_date(from_dt, to_year, to_month, to_day, to_file):
+def _get_relative_path(from_dt, to_dt, to_hour):
     """
-    from_dt のアーカイブページから、to_date のアーカイブページへの相対パスを生成。
+    from_dt のアーカイブページから to_dt のアーカイブページへの相対パスを生成。
+    例: 2026/06/22/04-00.html から 2026/06/22/00-00.html へ → "00-00.html"
+    例: 2026/06/22/04-00.html から 2026/06/21/20-00.html へ → "../21/20-00.html"
     """
     fy, fm, fd = from_dt.year, from_dt.month, from_dt.day
-    ty, tm, td = to_year, to_month, to_day
+    ty, tm, td = to_dt.year, to_dt.month, to_dt.day
 
     if fy == ty and fm == tm and fd == td:
-        return to_file
+        return "{:02d}-00.html".format(to_hour)
     if fy == ty and fm == tm:
-        return "../{:02d}/".format(td) + to_file
+        return "../{:02d}/{:02d}-00.html".format(td, to_hour)
     if fy == ty:
-        return "../../{:02d}/{:02d}/".format(tm, td) + to_file
-    return "../../../{:04d}/{:02d}/{:02d}/".format(ty, tm, td) + to_file
-
-
-def get_recent_archive_links(base_dir, current_dt, days=7):
-    """
-    過去N日分のアーカイブ日付リンク情報を返す。相対パスを使用。
-    戻り値: [{"date_str": "06/17", "path": "../21/16-00.html", "has_data": True}, ...]
-    """
-    archive_root = Path(base_dir).resolve() / "archive"
-    links = []
-    today = datetime.now(JST)
-
-    for i in range(days):
-        d = today - timedelta(days=i)
-        date_path = archive_root / (str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day))
-        has_data = date_path.exists() and any(date_path.iterdir())
-
-        html_file = ""
-        if has_data:
-            try:
-                html_files = sorted([f.name for f in date_path.iterdir() if f.suffix == ".html"])
-                if html_files:
-                    html_file = html_files[-1]
-            except (OSError, PermissionError):
-                pass
-
-        if html_file:
-            path = _get_relative_path_to_date(current_dt, d.year, d.month, d.day, html_file)
-        else:
-            path = ""
-
-        links.append({
-            "date_str": "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day),
-            "path": path,
-            "has_data": has_data,
-        })
-
-    return links
-
-
-def get_top_page_archive_links(base_dir, days=7):
-    """
-    トップページ用：過去N日分のアーカイブリンクを絶対パス（リポジトリルートから）で返す。
-    戻り値: [{"date_str": "06/17", "path": "archive/2026/06/17/16-00.html", "has_data": True}, ...]
-    """
-    archive_root = Path(base_dir).resolve() / "archive"
-    links = []
-    today = datetime.now(JST)
-
-    for i in range(days):
-        d = today - timedelta(days=i)
-        # Pathオブジェクトを正しく構築
-        date_path = archive_root / str(d.year) / "{:02d}".format(d.month) / "{:02d}".format(d.day)
-        has_data = date_path.exists() and any(date_path.iterdir())
-
-        html_file = ""
-        if has_data:
-            try:
-                html_files = sorted([f.name for f in date_path.iterdir() if f.suffix == ".html"])
-                if html_files:
-                    html_file = html_files[-1]
-            except (OSError, PermissionError):
-                pass
-
-        if html_file:
-            path = "archive/" + str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day) + "/" + html_file
-        else:
-            path = ""
-
-        links.append({
-            "date_str": "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day),
-            "path": path,
-            "has_data": has_data,
-        })
-
-    return links
-
-
-def generate_archive_title(dt):
-    """アーカイブページの<title>を生成"""
-    return "{:02d}".format(dt.month) + "月" + "{:02d}".format(dt.day) + "日 " + "{:02d}".format(dt.hour) + "時台のトレンド｜Aoaeola"
+        return "../../{:02d}/{:02d}/{:02d}-00.html".format(tm, td, to_hour)
+    return "../../../{:04d}/{:02d}/{:02d}/{:02d}-00.html".format(ty, tm, td, to_hour)
 
 
 def get_same_day_hour_links(base_dir, current_dt):
@@ -225,31 +148,6 @@ def get_same_day_hour_nav_html(base_dir, current_dt):
             html_parts.append('<span class="hour-block-link empty">' + link["text"] + '</span>')
     html_parts.append('</div></nav>')
     return "".join(html_parts)
-
-
-def _get_relative_path(from_dt, to_dt, to_hour):
-    """
-    from_dt のアーカイブページから to_dt のアーカイブページへの相対パスを生成。
-    例: 2026/06/22/04-00.html から 2026/06/22/00-00.html へ → "00-00.html"
-    例: 2026/06/22/04-00.html から 2026/06/21/20-00.html へ → "../21/20-00.html"
-    """
-    fy, fm, fd = from_dt.year, from_dt.month, from_dt.day
-    ty, tm, td = to_dt.year, to_dt.month, to_dt.day
-
-    # 同じ日
-    if fy == ty and fm == tm and fd == td:
-        return "{:02d}-00.html".format(to_hour)
-
-    # 同じ月
-    if fy == ty and fm == tm:
-        return "../{:02d}/{:02d}-00.html".format(td, to_hour)
-
-    # 同じ年
-    if fy == ty:
-        return "../../{:02d}/{:02d}/{:02d}-00.html".format(tm, td, to_hour)
-
-    # 別年
-    return "../../../{:04d}/{:02d}/{:02d}/{:02d}-00.html".format(ty, tm, td, to_hour)
 
 
 def get_adjacent_archive_links(base_dir, dt):
@@ -315,6 +213,96 @@ def get_archive_pager_html(adj_links):
     return "".join(html_parts)
 
 
+def _get_relative_path_to_date(from_dt, to_year, to_month, to_day, to_file):
+    """
+    from_dt のアーカイブページから、to_date のアーカイブページへの相対パスを生成。
+    """
+    fy, fm, fd = from_dt.year, from_dt.month, from_dt.day
+    ty, tm, td = to_year, to_month, to_day
+
+    if fy == ty and fm == tm and fd == td:
+        return to_file
+    if fy == ty and fm == tm:
+        return "../{:02d}/".format(td) + to_file
+    if fy == ty:
+        return "../../{:02d}/{:02d}/".format(tm, td) + to_file
+    return "../../../{:04d}/{:02d}/{:02d}/".format(ty, tm, td) + to_file
+
+
+def get_recent_archive_links(base_dir, current_dt, days=7):
+    """
+    過去N日分のアーカイブ日付リンク情報を返す。相対パスを使用。
+    戻り値: [{"date_str": "06/17", "path": "../21/16-00.html", "has_data": True}, ...]
+    """
+    archive_root = Path(base_dir).resolve() / "archive"
+    links = []
+    today = datetime.now(JST)
+
+    for i in range(days):
+        d = today - timedelta(days=i)
+        date_path = archive_root / str(d.year) / "{:02d}".format(d.month) / "{:02d}".format(d.day)
+        has_data = date_path.exists() and any(date_path.iterdir())
+
+        html_file = ""
+        if has_data:
+            try:
+                html_files = sorted([f.name for f in date_path.iterdir() if f.suffix == ".html"])
+                if html_files:
+                    html_file = html_files[-1]
+            except (OSError, PermissionError):
+                pass
+
+        if html_file:
+            path = _get_relative_path_to_date(current_dt, d.year, d.month, d.day, html_file)
+        else:
+            path = ""
+
+        links.append({
+            "date_str": "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day),
+            "path": path,
+            "has_data": has_data,
+        })
+
+    return links
+
+
+def get_top_page_archive_links(base_dir, days=7):
+    """
+    トップページ用：過去N日分のアーカイブリンクをルートからの相対パスで返す。
+    戻り値: [{"date_str": "06/17", "path": "archive/2026/06/17/16-00.html", "has_data": True}, ...]
+    """
+    archive_root = Path(base_dir).resolve() / "archive"
+    links = []
+    today = datetime.now(JST)
+
+    for i in range(days):
+        d = today - timedelta(days=i)
+        date_path = archive_root / str(d.year) / "{:02d}".format(d.month) / "{:02d}".format(d.day)
+        has_data = date_path.exists() and any(date_path.iterdir())
+
+        html_file = ""
+        if has_data:
+            try:
+                html_files = sorted([f.name for f in date_path.iterdir() if f.suffix == ".html"])
+                if html_files:
+                    html_file = html_files[-1]
+            except (OSError, PermissionError):
+                pass
+
+        if html_file:
+            path = "archive/" + str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day) + "/" + html_file
+        else:
+            path = ""
+
+        links.append({
+            "date_str": "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day),
+            "path": path,
+            "has_data": has_data,
+        })
+
+    return links
+
+
 def get_archive_nav_html(base_dir, current_dt, days=7):
     """過去N日のアーカイブナビゲーションHTMLを生成"""
     links = get_recent_archive_links(base_dir, current_dt, days=days)
@@ -323,7 +311,7 @@ def get_archive_nav_html(base_dir, current_dt, days=7):
     html_parts.append('<div class="archive-nav-label">過去7日のアーカイブ</div>')
     html_parts.append('<div class="archive-nav-links">')
     for link in links:
-        if link["has_data"]:
+        if link["has_data"] and link["path"]:
             cls = "archive-nav-link"
             if link["date_str"] == current_date_str:
                 cls = "archive-nav-link current"
@@ -334,6 +322,11 @@ def get_archive_nav_html(base_dir, current_dt, days=7):
             html_parts.append('<span class="archive-nav-link empty">' + link["date_str"] + '</span>')
     html_parts.append('</div></nav>')
     return "".join(html_parts)
+
+
+def generate_archive_title(dt):
+    """アーカイブページの<title>を生成"""
+    return "{:02d}".format(dt.month) + "月" + "{:02d}".format(dt.day) + "日 " + "{:02d}".format(dt.hour) + "時台のトレンド｜Aoaeola"
 
 
 def safe_replace(template, key, value):
@@ -382,7 +375,6 @@ def render_single_archive_page(base_dir, template_path, dt, content_cards_html):
     result = safe_replace(result, "PAGER_TOP", pager)
     result = safe_replace(result, "HOUR_BLOCKS_NAV", hour_nav)
     result = safe_replace(result, "CONTENT_CARDS", content_cards_html)
-    # PAGER_BOTTOM removed - only PAGER_TOP is used
     result = safe_replace(result, "ARCHIVE_NAV", archive_nav)
     result = safe_replace(result, "GENERATION_TIME",
         datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S"))
