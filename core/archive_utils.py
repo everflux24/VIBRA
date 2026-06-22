@@ -88,10 +88,26 @@ def cleanup_old_archives(base_dir, cutoff_days=365):
     return deleted
 
 
-def get_recent_archive_links(base_dir, days=7):
+def _get_relative_path_to_date(from_dt, to_year, to_month, to_day, to_file):
     """
-    過去N日分のアーカイブ日付リンク情報を返す。
-    戻り値: [{"date_str": "06/17", "path": "archive/2026/06/17/16-00.html", "has_data": True}, ...]
+    from_dt のアーカイブページから、to_date のアーカイブページへの相対パスを生成。
+    """
+    fy, fm, fd = from_dt.year, from_dt.month, from_dt.day
+    ty, tm, td = to_year, to_month, to_day
+
+    if fy == ty and fm == tm and fd == td:
+        return to_file
+    if fy == ty and fm == tm:
+        return "../{:02d}/".format(td) + to_file
+    if fy == ty:
+        return "../../{:02d}/{:02d}/".format(tm, td) + to_file
+    return "../../../{:04d}/{:02d}/{:02d}/".format(ty, tm, td) + to_file
+
+
+def get_recent_archive_links(base_dir, current_dt, days=7):
+    """
+    過去N日分のアーカイブ日付リンク情報を返す。相対パスを使用。
+    戻り値: [{"date_str": "06/17", "path": "../21/16-00.html", "has_data": True}, ...]
     """
     archive_root = Path(base_dir).resolve() / "archive"
     links = []
@@ -112,9 +128,9 @@ def get_recent_archive_links(base_dir, days=7):
                 pass
 
         if html_file:
-            path = "archive/" + str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day) + "/" + html_file
+            path = _get_relative_path_to_date(current_dt, d.year, d.month, d.day, html_file)
         else:
-            path = "archive/" + str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day) + "/"
+            path = ""
 
         links.append({
             "date_str": "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day),
@@ -263,7 +279,7 @@ def get_archive_pager_html(adj_links):
 
 def get_archive_nav_html(base_dir, current_dt, days=7):
     """過去N日のアーカイブナビゲーションHTMLを生成"""
-    links = get_recent_archive_links(base_dir, days=days)
+    links = get_recent_archive_links(base_dir, current_dt, days=days)
     current_date_str = "{:02d}/{:02d}".format(current_dt.month, current_dt.day)
     html_parts = ['<nav class="archive-nav">']
     html_parts.append('<div class="archive-nav-label">過去7日のアーカイブ</div>')
