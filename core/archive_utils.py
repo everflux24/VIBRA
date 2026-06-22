@@ -344,7 +344,7 @@ def render_single_archive_page(base_dir, template_path, dt, content_cards_html):
     result = safe_replace(result, "PAGER_TOP", pager)
     result = safe_replace(result, "HOUR_BLOCKS_NAV", hour_nav)
     result = safe_replace(result, "CONTENT_CARDS", content_cards_html)
-    result = safe_replace(result, "PAGER_BOTTOM", pager)
+    # PAGER_BOTTOM removed - only PAGER_TOP is used
     result = safe_replace(result, "ARCHIVE_NAV", archive_nav)
     result = safe_replace(result, "GENERATION_TIME",
         datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S"))
