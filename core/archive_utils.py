@@ -141,6 +141,43 @@ def get_recent_archive_links(base_dir, current_dt, days=7):
     return links
 
 
+def get_top_page_archive_links(base_dir, days=7):
+    """
+    トップページ用：過去N日分のアーカイブリンクを絶対パス（リポジトリルートから）で返す。
+    戻り値: [{"date_str": "06/17", "path": "archive/2026/06/17/16-00.html", "has_data": True}, ...]
+    """
+    archive_root = Path(base_dir).resolve() / "archive"
+    links = []
+    today = datetime.now(JST)
+
+    for i in range(days):
+        d = today - timedelta(days=i)
+        date_path = archive_root / (str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day))
+        has_data = date_path.exists() and any(date_path.iterdir())
+
+        html_file = ""
+        if has_data:
+            try:
+                html_files = sorted([f.name for f in date_path.iterdir() if f.suffix == ".html"])
+                if html_files:
+                    html_file = html_files[-1]
+            except (OSError, PermissionError):
+                pass
+
+        if html_file:
+            path = "archive/" + str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day) + "/" + html_file
+        else:
+            path = ""
+
+        links.append({
+            "date_str": "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day),
+            "path": path,
+            "has_data": has_data,
+        })
+
+    return links
+
+
 def generate_archive_title(dt):
     """アーカイブページの<title>を生成"""
     return "{:02d}".format(dt.month) + "月" + "{:02d}".format(dt.day) + "日 " + "{:02d}".format(dt.hour) + "時台のトレンド｜Aoaeola"
