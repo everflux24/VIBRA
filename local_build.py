@@ -354,16 +354,46 @@ def esc(text):
 # Archive Footer HTML Generator
 # ============================================================
 def generate_top_footer_archive_links(now, output_dir):
-    """過去7日のアーカイブリンクをフッターとして生成"""
-    links = get_recent_archive_links(output_dir, now, days=7)
-    if not links:
+    """過去7日のアーカイブリンクをフッターとして生成（トップページ用：絶対パス）"""
+    archive_root = Path(output_dir).resolve() / "archive"
+    links = []
+    today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+
+    for i in range(7):
+        d = today - datetime.timedelta(days=i)
+        date_path = archive_root / (str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day))
+        has_data = date_path.exists() and any(date_path.iterdir())
+
+        html_file = ""
+        if has_data:
+            try:
+                html_files = sorted([f.name for f in date_path.iterdir() if f.suffix == ".html"])
+                if html_files:
+                    html_file = html_files[-1]
+            except (OSError, PermissionError):
+                pass
+
+        # トップページからは絶対パス /archive/YYYY/MM/DD/HH-00.html
+        if html_file:
+            path = "/archive/" + str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day) + "/" + html_file
+        else:
+            path = ""
+
+        links.append({
+            "date_str": "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day),
+            "path": path,
+            "has_data": has_data,
+        })
+
+    if not any(link["has_data"] for link in links):
         return ""
+
     html_parts = ['<footer class="archive-footer">']
     html_parts.append('<div class="archive-footer-label">過去7日のアーカイブ</div>')
     html_parts.append('<div class="archive-footer-links">')
     for link in links:
         cls = "archive-footer-link" if link["has_data"] else "archive-footer-link empty"
-        if link["has_data"]:
+        if link["has_data"] and link["path"]:
             html_parts.append(
                 '<a href="' + link["path"] + '" class="' + cls + '">' + link["date_str"] + '</a>'
             )
