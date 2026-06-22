@@ -355,7 +355,7 @@ def esc(text):
 # ============================================================
 def generate_top_footer_archive_links(now, output_dir):
     """過去7日のアーカイブリンクをフッターとして生成"""
-    links = get_recent_archive_links(output_dir, days=7)
+    links = get_recent_archive_links(output_dir, now, days=7)
     if not links:
         return ""
     html_parts = ['<footer class="archive-footer">']
