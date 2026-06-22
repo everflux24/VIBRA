@@ -777,6 +777,10 @@ def save_archive(clusters, now, iso_time):
                 '<div class="meta">' + chr(0x1F525) + ' ' + posts_str + ' ポスト</div>'
                 '</article>'
             )
+        # 防御的チェック: コンテンツが空なら警告
+        if not content.strip():
+            print("WARNING: generate_content_cards returned empty content for " + str(dt))
+            content = '<article class="card"><h2>データ取得中</h2><p>コンテンツを読み込めませんでした。</p></article>'
         return content
 
     # v2.5.1: updated_files をループ外で初期化
