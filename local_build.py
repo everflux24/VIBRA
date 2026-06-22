@@ -758,6 +758,25 @@ def save_archive(clusters, now, iso_time):
         print("  Skipping archive generation.")
         return
 
+    # テンプレート検証: <base target="_blank"> が残存していないか確認
+    with open(template_path, "r", encoding="utf-8") as f:
+        template_content = f.read()
+    if '<base' in template_content:
+        print("CRITICAL WARNING: Template still contains <base> tag!")
+        print("  Please update templates/archive_page.html to remove <base target="_blank">")
+        # 緊急回避: テンプレートから <base ...> を削除
+        template_content = template_content.replace('<base target="_blank">', '')
+        template_content = template_content.replace("<base target='_blank'>", '')
+        # 一時ファイルに書き出し
+        import tempfile
+        temp_fd, temp_path = tempfile.mkstemp(suffix='.html')
+        with os.fdopen(temp_fd, 'w', encoding='utf-8') as f:
+            f.write(template_content)
+        template_path = temp_path
+        print("  Emergency fix applied: removed <base> tag from template")
+    else:
+        print("Template validation passed: no <base> tag found")
+
     # コンテンツカード生成関数
     def generate_content_cards(dt):
         content = ""
