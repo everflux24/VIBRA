@@ -375,7 +375,7 @@ def generate_top_footer_archive_links(now, output_dir):
 
         # トップページからは絶対パス /archive/YYYY/MM/DD/HH-00.html
         if html_file:
-            path = "/archive/" + str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day) + "/" + html_file
+            path = "https://everflux24.github.io/Aoaeola/archive/" + str(d.year) + "/" + "{:02d}".format(d.month) + "/" + "{:02d}".format(d.day) + "/" + html_file
         else:
             path = ""
 
