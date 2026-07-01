@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>07月02日 08時台のトレンド｜Aoaeola</title>
+  <meta name="description" content="07月02日 08時台のトレンド｜Aoaeola — Aoaeolaが選んだ注目トレンド">
+  <link rel="canonical" href="https://everflux24.github.io/Aoaeola/archive/2026/07/02/08-00.html">
+  <style>
+    :root {
+      --bg-start: hsl(354, 70%, 45%);
+      --bg-end: hsl(34, 70%, 55%);
+      --text: #1a1a2e;
+      --card-bg: rgba(255,255,255,0.85);
+      --accent: hsl(354, 70%, 35%);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+      min-height: 100vh;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    header {
+      text-align: center;
+      padding: 3rem 0 2rem;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    header time {
+      display: block;
+      margin-top: 0.5rem;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.9rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+    .card p {
+      font-size: 0.95rem;
+      color: #444;
+    }
+    .card .meta {
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: #888;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(255,255,255,0.9);
+      color: var(--accent);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .back-link:hover {
+      background: #fff;
+    }
+    .hour-blocks-nav {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+    }
+    .hour-blocks-label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+    .hour-blocks-links {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .hour-block-link {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+    .hour-block-link:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .hour-block-link.current {
+      background: rgba(255,255,255,0.5);
+      font-weight: 700;
+    }
+    .hour-block-link.empty {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .archive-pager {
+      display: flex;
+      justify-content: space-between;
+      margin: 1.5rem 0;
+      padding: 0 0.5rem;
+    }
+    .archive-pager a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .archive-pager a:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .archive-pager .disabled {
+      opacity: 0.3;
+      pointer-events: none;
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+    }
+    .archive-nav {
+      margin: 2rem 0;
+      padding: 1rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+    }
+    .archive-nav-label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+    .archive-nav-links {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .archive-nav-link {
+      display: inline-block;
+      padding: 0.4rem 0.7rem;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      transition: background 0.2s;
+    }
+    .archive-nav-link:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .archive-nav-link.current {
+      background: rgba(255,255,255,0.5);
+      font-weight: 700;
+    }
+    .archive-nav-link.empty {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    footer {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.8rem;
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "07月02日 08時台のトレンド｜Aoaeola",
+    "description": "07月02日 08時台のトレンド｜Aoaeola — Aoaeolaが選んだ注目トレンド",
+    "url": "https://everflux24.github.io/Aoaeola/archive/2026/07/02/08-00.html",
+    "datePublished": "2026-07-02T08:00:00+09:00",
+    "dateModified": "2026-07-02T08:00:00+09:00"
+  }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>07月02日 08時台のトレンド｜Aoaeola</h1>
+      <time datetime="2026-07-02T08:00:00+09:00">2026年07月02日 08:00</time>
+    </header>
+
+    <!--NAV:PAGER_TOP-->
+<div class="archive-pager"><a href="https://everflux24.github.io/Aoaeola/archive/2026/07/02/04-00.html">← 07/02 04:00</a><span class="disabled">次へ →</span></div>
+<!--/NAV:PAGER_TOP-->
+
+    <!--NAV:HOUR_BLOCKS-->
+<nav class="hour-blocks-nav"><div class="hour-blocks-label">本日のアーカイブ</div><div class="hour-blocks-links"><a href="https://everflux24.github.io/Aoaeola/archive/2026/07/02/00-00.html" class="hour-block-link">00:00</a><a href="https://everflux24.github.io/Aoaeola/archive/2026/07/02/04-00.html" class="hour-block-link">04:00</a><span class="hour-block-link empty">08:00</span><span class="hour-block-link empty">12:00</span><span class="hour-block-link empty">16:00</span><span class="hour-block-link empty">20:00</span></div></nav>
+<!--/NAV:HOUR_BLOCKS-->
+
+    <main class="content-cards">
+      <article class="card"><h2>ハリー・ケイン2ゴールで逆転勝利、イングランドがワールドカップベスト16進出</h2><p>ハリー・ケインが後半に2発を決め、イングランドはコンゴ民主共和国に2-1で逆転勝ち、劇的なゴールで試合を決め、ベスト16へ駆け上がった。</p><div class="meta">🔥 6,160 ポスト</div></article><article class="card"><h2>PlayStation、ディスク生産終了へ　ファンは「寂しい」と嘆く</h2><p>ソニーが新作ゲームのディスク生産をやめて、ダウンロードだけにすると発表した。これに合わせて、PS3とVita向けのPlayStation Storeも2027年に閉じることが決まった。</p><div class="meta">🔥 1,485 ポスト</div></article><article class="card"><h2>ベルギー、延長後半のPKで逆転チャンスに熱狂「劇的」ファン沸騰</h2><p>ベルギーが延長後半のアディショナルタイムでPKを獲得したとSNSで大騒ぎ！2-2の同点だった試合が、最後のチャンスに持ち込まれ、ファンは「劇的」「ワクワク」している様子が伝わってくる。VARでの判定確認も話題になり、試合の行方が一気に注目された。</p><div class="meta">🔥 923 ポスト</div></article><article class="card"><h2>リズム天国 ミラクルスターズ発売、ファン歓喜の配信とメダル争奪が話題に</h2><p>『リズム天国 ミラクルスターズ』がNintendo Switchで発売され、ファンが祝福ツイートやライブ配信で新作プレイを披露し、リミックスやメダル取得に挑戦している様子が広がっている。</p><div class="meta">🔥 857 ポスト</div></article><article class="card"><h2>セネガル代表、ディアラとサールのゴールでベルギーに2-0勝利　“胸トラップがすごい”と歓声</h2><p>セネガル代表がディアラの先制ゴールでベルギーをリードし、後半にイスマイラ・サールが追加点を決めて2-0の快勝を飾った。試合はDAZNやNHK総合でライブ配信され、SNS上では『サールすごい！』や『胸トラップが最高』声が多数上がっている。</p><div class="meta">🔥 760 ポスト</div></article><article class="card"><h2>睡眠トラブル増加、変な時間に目覚めて「もうちょっと寝たい」という声が寄せられる</h2><p>SNS上で、深夜や早朝に突然目が覚めてしまう、寝落ちして変な時間に起きる、アラームが鳴らない睡眠トラブルが多数報告されている。昼夜逆転や寝不足に悩む声が多く、再び寝付くのが難しい様子が伝わってくる。</p><div class="meta">🔥 589 ポスト</div></article><article class="card"><h2>お弁当が続々投稿、雨の日も『今日も頑張ろう』の声が広がる</h2><p>みんなが作ったお弁当が続々とSNSにアップされ、焼き魚や揚げ物、野菜たっぷりの彩り豊かなメニューが披露されている。『今日も頑張ろう』や『美味しそう』コメントが添えられ、雨の日でも元気にランチを楽しむ様子が伝わってくる。</p><div class="meta">🔥 578 ポスト</div></article><article class="card"><h2>西山智樹、TOKYOFM『RooTs』第40回放送で新動画公開　ファンは「楽しそう」</h2><p>西山智樹がTOKYOFMの『RooTs』第40回放送で新作トークや限定動画を披露し、リスナーからは「楽しそう」「Tシャツ可愛い」「iPhoneの話が面白い」コメントが寄せられ、番組が盛り上がっている。</p><div class="meta">🔥 550 ポスト</div></article><article class="card"><h2>レイカーズ、ウォーカー・ケスラー獲得で歓喜の声続出　“マムも同時に”</h2><p>レイカーズがジャズからウォーカー・ケスラーをサイン＆トレードで獲得し、1巡目指名権やスワップ権を渡したことがSNSで盛り上がっている。</p><div class="meta">🔥 540 ポスト</div></article><article class="card"><h2>幼女戦記（劇場版）深夜放送、雨警報と戦闘シーンでファン歓喜</h2><p>BS11で深夜に『幼女戦記』劇場版が放送され、迫力の戦闘シーンが楽しめるものの、同時に大雨警報が流れ、雨音が気になるというちょっぴりハプニングが起きている。</p><div class="meta">🔥 505 ポスト</div></article><article class="card"><h2>ベルギー、0-2から逆転勝利　“2-0は危険なスコア”が再確認されたワールドカップ戦</h2><p>ベルギーは前半0-2でリードされたセネガルに対し、後半に追いつき延長戦へ持ち込み、延長戦のPKで決めて逆転勝利した。</p><div class="meta">🔥 416 ポスト</div></article><article class="card"><h2>デクララン・ライスが右サイドバックで復活、イングランドの同点ゴールに貢献</h2><p>デクララン・ライスが右サイドバックに転向し、サカ＆エゼと『アーセナル』コンビを結成。右サイドからのクロスが炸裂し、ケインがヘディングで同点ゴールを決めた。ライスの高い位置取りで数的有利を作り、相手ディフェンスを揺さぶった結果、試合は一気に盛り上がった。ファンは『ライス右SBが優秀』と称賛し、次の攻撃展開に期待を寄せている。</p><div class="meta">🔥 366 ポスト</div></article><article class="card"><h2>白岩瑠姫、オールナイトニッポンXでNekoコーナーとV3祝福がファン熱狂</h2><p>白岩瑠姫がラジオ放送でNekoコーナーを披露し、V3達成を祝う様子がファンの間で話題になっている。リスナーは瑠姫の声やトークを楽しみ、Nekoの撮影エピソードやV3のおめでとうメッセージが飛び交っている。</p><div class="meta">🔥 362 ポスト</div></article><article class="card"><h2>コンゴ民主共和国、先制も逆転負けでジャイアントキリングは叶わず　ファンの期待と失望が交錯</h2><p>コンゴが先制したものの、イングランドが逆転し2-1で勝ち、ジャイアントキリングは叶わなかったんだね。</p><div class="meta">🔥 319 ポスト</div></article><article class="card"><h2>デ・ブライネとドク交代、ベルギー0-2でのサブスティチューションにファンの驚きの声</h2><p>ベルギーは0-2で追い込まれた試合中、デ・ブライネとドクが55分過ぎにベンチへ回された。ファンからは驚きや失望の声が上がった。</p><div class="meta">🔥 313 ポスト</div></article><article class="card"><h2>「ベルギー対セネガル戦」観戦熱が高まる、キックオフ前に「見たい！」と声が続出</h2><p>ベルギー対セネガル戦が間近に迫り、SNSでは「見たい！」「観戦予定」声が続出。キックオフ5時の放送情報やスタメン発表が紹介され、試合前のワクワク感が広がっている様子が伝わる。また、仕事や睡眠と戦いながらもテレビやスマホでチェックする人が多く、試合開始前の盛り上がりが感じられる。</p><div class="meta">🔥 280 ポスト</div></article><article class="card"><h2>がんばれゴエモン大集合！発売でファン歓喜「やったぜ」感が広がる</h2><p>『がんばれゴエモン大集合！』がリリースされ、13作品が一気に遊べるようになったと話題に。くじやサウンドテスト機能が登場し、ファンがワクワクしながらプレイを始めている様子が見られる。</p><div class="meta">🔥 256 ポスト</div></article><article class="card"><h2>コンゴ民主共和国、堅守と先制で好評　『コンゴはいいチームだ』とSNSで盛り上がり</h2><p>2026年ワールドカップでコンゴ民主共和国がイングランド相手に先制し、守備の堅さとキーパーの好セーブが光った。組織的な攻撃も評価され、試合が盛り上がっている様子が投稿に映っている。</p><div class="meta">🔥 248 ポスト</div></article><article class="card"><h2>FANTASTICS『SUNFLOWER』大阪公演、ファンが「やばすぎた」熱狂の瞬間</h2><p>『SUNFLOWER』の大阪ステージで、ハンドアップの盛り上がりやメンバーのかくし芸が披露され、ファンはステージ前で撮影しながら熱狂的に応援した様子がSNSに広がっている。</p><div class="meta">🔥 225 ポスト</div></article><article class="card"><h2>ティーレマンス、ヘディングで同点ゴール！ベルギーがセネガルに追いつき延長戦へ</h2><p>ベルギーがセネガルに0-2でリードされる中、ルカクがゴールで1点返し、すぐ後にトロサールのクロスをティーレマンスがヘディングで決め、44分に同点に追いついたんだって！試合は延長戦へ突入した。</p><div class="meta">🔥 224 ポスト</div></article><article class="card"><h2>ナツコミ2026、ワンピースカード争奪で店内混雑　一部で「死ぬかと思った」声も</h2><p>2026年7月1日から全国の書店で行われたナツコミ2026で、ワンピースのメタキラカードが1冊につき1枚配られ、来店者がカードを巡って列を作り、店内は混雑し、カードの限定性や転売が話題になった。</p><div class="meta">🔥 221 ポスト</div></article><article class="card"><h2>半導体指数SOX、年初来でS&amp;P500を85ポイント上回り史上最高の上半期へ</h2><p>米国の半導体指数SOXが今年上半期でS&amp;P500を約85ポイント上回り、年初来で94％の伸びを見せている。過去のドットコムバブル時の記録を超える勢いが続いている模様だ。</p><div class="meta">🔥 208 ポスト</div></article><article class="card"><h2>エムパシ、スーパーセーブ連発でW杯MVP候補に「やばすぎ」ファン熱狂</h2><p>SNSでエムパシがスーパーセーブを次々に見せ、金的ブロックや身体を張ったプレーが話題に。『エムパシ神キーパー』『やばすぎ』と称賛が続き、MVP候補の声も上がっている。ファンは「止めすぎ」「凄すぎ」コメントで盛り上がり、エムパシの活躍が大会のハイライトになっている様子が伝わる。</p><div class="meta">🔥 191 ポスト</div></article><article class="card"><h2>ナイキ、時間外取引で3%下落も決算は予想上回り　株価は39.80ドルで推移</h2><p>ナイキは時間外取引で約3％下げ、株価が39.80ドルに。第4四半期の決算は、一時的な関税回復分を除くと、調整後EPSが0.20ドルで予想0.13ドルを上回り、売上も僅かに上回った。来週の決算説明会で2027年度第1四半期のガイダンスが発表される予定だ。</p><div class="meta">🔥 189 ポスト</div></article><article class="card"><h2>トッテナム、サンドロ・トナーリとマテウス・フェルナンデス獲得で移籍市場が活発化　ファン歓喜の声</h2><p>トッテナムがサンドロ・トナーリとマテウス・フェルナンデスを獲得し、記録的な金額での移籍が進んでいるなっている。</p><div class="meta">🔥 166 ポスト</div></article><article class="card"><h2>SOX指数が急落、半導体株が大幅下落、一部で驚きの声も見られる</h2><p>SOX指数が急落し、半導体株が大きく下落した。AI関連の利益確定が原因とみられ、ダウやS&amp;P500はわずかに下落した。投資家の中には驚きを示す声もある。</p><div class="meta">🔥 165 ポスト</div></article><article class="card"><h2>PlayStation、2028年1月から新作ゲームのディスク版生産終了　「寂しい」「便利」声</h2><p>2028年1月からPlayStationの新作ゲームはディスク版が作られず、ダウンロード版だけで提供されることが公式に発表された。これにより、物理ディスク販売は終了し、デジタル配信へとシフトする流れが本格化した。</p><div class="meta">🔥 151 ポスト</div></article><article class="card"><h2>ジェイレン・ブラウン、シクサーズへ移籍　“マジでシクサーズ強すぎる”とファン歓喜</h2><p>ボストン・セルティックスがジェイレン・ブラウンをシクサーズへ送る大規模トレードが行われ、ポール・ジョージと複数のドラフト指名権が交換された。</p><div class="meta">🔥 145 ポスト</div></article><article class="card"><h2>EBiDAN『Yes! 東京』配信開始とMVプレミアにファン歓喜「最高すぎる」</h2><p>『Yes! 東京』が配信され、MVがプレミア公開されたことが話題になっている。ONE N&#x27; ONLY版とSakurashimeji版のティザー映像も同時に登場し、ハイレゾ音源が楽しめるようになった。</p><div class="meta">🔥 141 ポスト</div></article><article class="card"><h2>ウェルカム浩平、新コーナー開始と新曲披露で視聴者歓喜「やべぇ！」「新コーナー来た」</h2><p>ウェルカム浩平が『The Wakey Show』で新コーナーを始め、レギュラー出演が決まった上に『いただきますのその前に』という新曲を披露したことがSNSで盛んにシェアされ、ファンからは「やべぇ！」「新コーナー来た」歓声が上がっている。</p><div class="meta">🔥 132 ポスト</div></article><article class="card"><h2>「暴れん坊将軍」新エピソード「買われたお姫様の秘密」開始にファン歓喜の声</h2><p>『暴れん坊将軍』の最新放送が始まり、視聴者はツイートで感想やイラスト、動画リンクを次々に投稿。中でも第VIII話『買われたお姫様の秘密』のスタートが多くのユーザーに取り上げられ、シリーズへの期待感が高まっている。</p><div class="meta">🔥 121 ポスト</div></article><article class="card"><h2>「CHUNITHM Mate」稼働開始、ユーザーが「やるぜ！」と歓喜</h2><p>CHUNITHM Mateがついに稼働開始！店頭のアップデートが追いつかないところもあるけど、稼働記念で毎日プレイすると限定チケットがもらえるイベントが開催中。</p><div class="meta">🔥 116 ポスト</div></article><article class="card"><h2>ロメル・ルカクが決めた！ベルギー、ワールドカップで1点返し試合を盛り上げる</h2><p>ルカクが決めたゴールでベルギーが1点返し、試合が盛り上がった！残り時間が少ない中、みんなが「さすがルカク！」とテンション上がり、次の展開にワクワクしている様子。</p><div class="meta">🔥 114 ポスト</div></article><article class="card"><h2>「水着マルチャーナ」登場でガチャ熱！「これで3凸目指します」などファンの期待が高まる</h2><p>みんなで水着マルチャーナを狙う熱気が広がってる！ガチャ回す計画や石の使い道を語り合いながら、3凸への道を楽しんでいる様子が投稿からうかがえる。「これで水着シンデレラと水着マルチャーナ3凸目指します」など期待の声が飛び交う。</p><div class="meta">🔥 113 ポスト</div></article><article class="card"><h2>ジョーダン・ピックフォード、コンゴ戦でニア抜き失点に対しファンから批判の声が上がる</h2><p>イングランドのゴールキーパー、ジョーダン・ピックフォードがコンゴ戦でニア抜きのシュートを止めきれず、先制点を許した。SNSでは失点に対する批判的なコメントが見られる。</p><div class="meta">🔥 108 ポスト</div></article><article class="card"><h2>イスマイラ・サール、胸トラップからの豪快ゴールでセネガル2-0勝利を飾る「豪快な一撃」称賛の声もある</h2><p>セネガルとベルギーのワールドカップ32回戦で、イスマイラ・サールが胸トラップからのファーストタッチで豪快なゴールを決め、セネガルは2-0で勝ち上がった。このゴールは彼の大会4点目で、SNS上で大きく話題になっている。</p><div class="meta">🔥 105 ポスト</div></article><article class="card"><h2>『THE TIME,』脳シャキクイズで黒電話の「3」正解、視聴者が大盛り上がり</h2><p>『THE TIME,』の7月2日放送で、黒電話の数字配置クイズが登場し、視聴者は「3」が正解だと盛り上がり、ツイートで答えや感想が次々にシェアされた。同時に安住紳一郎さんのオープニングトークがなくなったことも話題に。</p><div class="meta">🔥 103 ポスト</div></article><article class="card"><h2>イングランド代表、パーマー・フォーデン不在で批判の声が上がる　“呼んでくれ”の声が一部で拡散</h2><p>イングランド代表がコンゴ戦でパーマーとフォーデンを呼ばなかったことが話題に。ファンは「パーマー欲しい」「フォーデン呼んでくれ」ツイートし、監督への不満の声が見られる。結果として、チームの攻撃力が足りないと感じる声があり、次の戦術変更を期待する声も上がっている。</p><div class="meta">🔥 96 ポスト</div></article><article class="card"><h2>マイクロン、GMと長期メモリ供給契約発表も株価急落</h2><p>マイクロンがGMとメモリ供給の長期契約を発表したが、株価は一気に10％以上下落した。投資家はこの下落をツイートで指摘している。</p><div class="meta">🔥 94 ポスト</div></article><article class="card"><h2>「進撃の巨人3」公式放送で映像美とアクションが披露、ファンは「映像綺麗すぎる」「絶対買う」など熱狂</h2><p>7月2日朝、進撃の巨人3の公式放送が配信され、声優ゲストが登場し、綺麗な映像と迫力あるアクションが見られた。ファンは「映像綺麗すぎる」って喜んでる。</p><div class="meta">🔥 93 ポスト</div></article><article class="card"><h2>木曜日が止まらない！雨と仕事に疲れたSNSユーザーが「まだ木曜」感を嘆く</h2><p>Twitterで「まだ木曜日」感が話題に。雨が降り続き、仕事が山積みで疲れがたまる中、みんなが「週が長い」「金曜気分」ってツイートしている。雨模様や仕事の多さが共通のネタになっている。</p><div class="meta">🔥 91 ポスト</div></article><article class="card"><h2>「あらなみマイクラ」エンドラ討伐で大盛り上がり、みんな「最高」「楽しかった」と絶賛</h2><p>あらなみマイクラの配信で、チームがエンドラ討伐とエンドシティ探索を協力プレイし、エリトラを手に入れた様子が報告された。長時間の配信に対し「最高」「楽しかった」コメントが多数寄せられた。</p><div class="meta">🔥 90 ポスト</div></article><article class="card"><h2>めざましディズニー」クイズでウッディが託したのはBの保安官バッジ、正解予想が盛り上がる</h2><p>『めざましディズニー』のクイズで、ウッディがジェシーに渡したのはBの保安官バッジだとみんなが答えていて、正解予想とグッズプレゼントが話題になっている。</p><div class="meta">🔥 78 ポスト</div></article><article class="card"><h2>エムバペ、フランス対スウェーデンで2ゴール！SNSで大歓喜の声</h2><p>エムバペがフランス対スウェーデン戦で2ゴールを決め、観戦者は「すごすぎる」「最高」と歓声を上げて盛り上がっている様子がSNSに広がっている。</p><div class="meta">🔥 78 ポスト</div></article><article class="card"><h2>FANTASTICS、SUNFLOWER大阪公演初日が大盛況！ファンが「最高」「ありがとう」熱狂</h2><p>FANTASTICSが大阪で『SUNFLOWER』ツアー初日ライブを行い、熱いパフォーマンスと『HANDS UP』のステージが話題に。ファンは撮影可パートで盛り上がり、ポップアップやグッズ交換も楽しんだ。</p><div class="meta">🔥 74 ポスト</div></article><article class="card"><h2>リュディ・ガルシア監督の交代策が波紋、ベルギーが奇跡の追いつきに沸く</h2><p>リュディ・ガルシア監督が試合中に次々と選手を交代させ、ベルギーが逆転のチャンスを掴む様子がSNSで話題に。</p><div class="meta">🔥 72 ポスト</div></article><article class="card"><h2>エドゥアルド・メンディ不在でセネガルGK交代、ファンは驚きの声</h2><p>セネガル代表のゴールキーパーがエドゥアルド・メンディではなく、代わりの選手が出場したことがSNSで話題となっている。</p><div class="meta">🔥 69 ポスト</div></article><article class="card"><h2>ハリー・ケイン、逆転ゴールで英代表救う　“これぞエース”がSNSで大盛り上がり</h2><p>2026年のワールドカップで、イングランドのハリー・ケインが後半86分に逆転ゴールを決め、1-0のピンチを2-0にひっくり返したんだって。これでチームはベスト16へ進出した。ファンは『これぞエース！』と歓喜し、SNSは大盛り上がり。</p><div class="meta">🔥 63 ポスト</div></article><article class="card"><h2>ポジョ、セルティックスへトレード噂が巻き起こす波紋とファンの歓喜・戸惑い</h2><p>ポジョがセルティックスへ移籍するトレードが噂され、相手はジェイレン・ブラウンという組み合わせがSNSで話題になっている。ファンの間で期待と戸惑いが交錯している様子が見られる。</p><div class="meta">🔥 62 ポスト</div></article><article class="card"><h2>7月2日の半夏生が話題に！タコやうどんの風習がSNSで盛り上がる</h2><p>SNSでは「半夏生」が取り上げられ、夏至から11日目の雑節やカラスビシャクの出る時期、田植えの目安としての意味が紹介された上に、タコやうどんを楽しむ風習が話題になっている。</p><div class="meta">🔥 59 ポスト</div></article><article class="card"><h2>望月慎太郎、ウィンブルドンでストレート勝利し初の3回戦進出にファン歓喜</h2><p>望月慎太郎がウィンブルドン2回戦で世界47位クインをストレートセットで下し、初のグランドスラム3回戦へと進出したんだって！ファンの間で盛り上がっている。今回の勝利で、彼のネットプレーや芝適性が光り、次戦への期待が高まっている。</p><div class="meta">🔥 59 ポスト</div></article><article class="card"><h2>ベルギー代表、延長戦でのペナルティキックに対しSNSで賛否の声が上がる</h2><p>ベルギー代表が延長戦のアディショナルタイムでペナルティキックを受けたことがSNSで話題になっている。試合中の判定に対し、ユーザーが「既視感しかない」や「足を引っ込めてる」感想を投稿している。</p><div class="meta">🔥 58 ポスト</div></article><article class="card"><h2>ザイオン、リーズ移籍報道に「胸熱」ファン歓喜の声SNSで盛り上がり「期待大」</h2><p>日本人GKザイオンがプレミアリーグのリーズへ移籍するという噂がSNSで広がり、ファンの間で「胸熱」や「経験を積める」など期待の声が上がる一方で、クラブの順位や出場機会に不安を示すコメントも見られる。</p><div class="meta">🔥 49 ポスト</div></article><article class="card"><h2>『魔入りました！入間くん』第50巻発売決定、特装版に熱狂ファンが「やばすぎて泣き」</h2><p>最新単行本第50巻が9月8日に発売決定し、特装版には箔押しトランプやキーホルダーが付くと発表された。ファンは「やばすぎて泣き」や「感動した」感想を投稿し、盛り上がりを見せている。</p><div class="meta">🔥 47 ポスト</div></article><article class="card"><h2>「ルケバキオ、決定機で外す」SNSで「決めろ」声が一部で上がり、ファンが応援</h2><p>ベルギー代表の試合でルケバキオが決定機を得たものの、シュートを外して得点できなかった。SNSでは「ルケバキオ決めろよ」や「外す！？」声が見られ、プレーへの期待と残念な気持ちが交錯している。</p><div class="meta">🔥 47 ポスト</div></article><article class="card"><h2>サンドロ・トナーリ、トッテナムへ移籍合意　100億ポンド超の超大型メガディールでファン歓喜</h2><p>サンドロ・トナーリがトッテナムへ移籍合意したと噂が広がり、1億ポンド超の超大型メガディールが話題になっている。</p><div class="meta">🔥 46 ポスト</div></article><article class="card"><h2>TikTok Lite、ルーレットや招待で数千円報酬が話題に！みんなで参加しよう</h2><p>TikTok Liteでの報酬キャンペーンが盛んにシェアされ、ユーザーは紹介コードやルーレット、キックリワードで数千円分のポイントをゲットしようと呼びかけている様子が見られる。</p><div class="meta">🔥 44 ポスト</div></article><article class="card"><h2>ドル円が162.5円前後で上下　介入噂と米雇用統計が注目　相場が揺れる</h2><p>ドル円が162.5円前後で上下し、162.8円まで上がったり162.4円まで急落したりと変動が続く様子がSNSで話題になっていて、介入の噂や米雇用統計の影響が注目されている。</p><div class="meta">🔥 41 ポスト</div></article><article class="card"><h2>鈴木誠也（シカゴ・カブス）がMLB通算100本塁打達成、ファンから祝福の声が続出</h2><p>シカゴ・カブスの鈴木誠也がメジャーリーグで通算100本目のホームランを放ち、右打者として日本人初の快挙を達成したことがSNSで話題になっている。このホームランは13号本塁打で、先制スリーランとして打ち上げられ、ファンからは「おめでとう」「すごい」祝福コメントが多数寄せられている。</p><div class="meta">🔥 38 ポスト</div></article><article class="card"><h2>シペンガ、スペイン2部で先制ゴール！ドリブルとキレが話題に、ファン熱狂</h2><p>コンゴ代表のシペンガがスペイン2部リーグの試合で左サイドからドリブルで相手を抜き、先制ゴールを決めた。ゴール後もキレのある走りで攻撃に貢献し、SNSで「ドリブルがヤバい！」や「うますぎ」声が上がっている。</p><div class="meta">🔥 38 ポスト</div></article><article class="card"><h2>水瓶座に月が入星、木星とカイロンがスクエアで占い熱狂、SNSで話題に</h2><p>水瓶座に月が入って、木星とカイロンがスクエアに。占い師たちが「誰かのために」考え直すよう呼びかけて、みんなで星のエネルギーを楽しんでいる様子が見られる。</p><div class="meta">🔥 35 ポスト</div></article><article class="card"><h2>ヘルマン・ヘッセと古楽が融合、NHK FM『20世紀の文芸と古楽(4)』がリスナーの心を揺さぶる</h2><p>NHK FMの『20世紀の文芸と古楽(4)』が放送され、ヘルマン・ヘッセの作品とバッハやブクステフーデの古楽が紹介され、リスナーは朝のバロックに胸が高鳴る様子を楽しんでいる。</p><div class="meta">🔥 32 ポスト</div></article><article class="card"><h2>ラフラフ新曲『なんとかなるなる Laugh &amp; Smile』が宇宙初OAで登場、ファンは「元気が出る」など歓喜の声</h2><p>ラフラフの新曲『なんとかなるなる Laugh &amp; Smile』が宇宙初OAとして発表され、配信開始と同時に多くのファンが「元気が出る」や「楽しい」感想を投稿し、ライブでの披露が待ち遠しいと盛り上がっている。</p><div class="meta">🔥 30 ポスト</div></article><article class="card"><h2>シカゴ・カブス、23点スイープでパドレスを圧倒　「大量得点！」と歓喜の声</h2><p>シカゴ・カブスが23点の大爆発でパドレスを23-3のスイープ勝利。ホームランが続出し、パドレスは連敗が伸びてしまった。</p><div class="meta">🔥 29 ポスト</div></article><article class="card"><h2>スワンソン、3本塁打＆8打点で大活躍　カブスの23得点にファンは「やばい」歓喜</h2><p>スワンソン選手が1試合で3本塁打、8打点、合計23得点を挙げ、カブスが大幅リードで試合を終えたことがSNSで話題になっている。多くの投稿で『スワンソン3HRて』や『スワンソンやばWWWW』と驚きの声が上がっている。</p><div class="meta">🔥 28 ポスト</div></article><article class="card"><h2>かぐやの誕生日が7月12日に変更、ファンは「笑える」や「祝福」ムード</h2><p>山下監督がかぐやの誕生日を7月5日から7月12日に直すツイートをしたら、ファンが「笑える」や「祝福」って盛り上がって、即売会の日程も変わった。みんなで新しい日を祝う声が広がっている。</p><div class="meta">🔥 27 ポスト</div></article><article class="card"><h2>オールワークスメイド第1話放送、可愛いメイドに歓喜の声が広がる</h2><p>7月1日に放送された『ヒロイン？聖女？いいえ、オールワークスメイドです（誇）！』の第1話が視聴者に歓迎され、原作イラスト・雪子先生のエンドカードが公開された。続く第2話の放送やABEMAプレミアムでの先行配信、グッズ予約情報も同時に発表された。</p><div class="meta">🔥 26 ポスト</div></article><article class="card"><h2>ラストノート、嶋﨑斗亜が澄晴高校時代役に初出演 – 「最高！」の声が続出</h2><p>フジテレビの木曜劇場『ラストノート』で、関西ジュニアの嶋﨑斗亜が寺西拓人演じる澄晴の高校時代役に初挑戦することが発表された。7月9日（木）22時スタートで、ファンの期待が高まっている。</p><div class="meta">🔥 25 ポスト</div></article><article class="card"><h2>「King &amp; Prince」ドームツアー映像がオリコン史上初の3部門同時1位に　ファン歓喜の声続出</h2><p>King &amp; Princeの最新ドームツアー映像がオリコンで3部門同時1位を獲得し、初週10.6万枚を売り上げたことがSNSで紹介され、ファンの間で大きく話題になっている。</p><div class="meta">🔥 19 ポスト</div></article><article class="card"><h2>ビクター・ウィリス氏死去、74歳　『Y.M.C.A.』の歌声に思い出す声続く</h2><p>ビクター・ウィリスさんが74歳で亡くなったことがSNSで広がり、Village Peopleのリードボーカルとしての功績や『Y.M.C.A.』の思い出が語られた。</p><div class="meta">🔥 18 ポスト</div></article>
+    </main>
+
+    <!--NAV:PAGER_BOTTOM-->
+<div class="archive-pager"><a href="https://everflux24.github.io/Aoaeola/archive/2026/07/02/04-00.html">← 07/02 04:00</a><span class="disabled">次へ →</span></div>
+<!--/NAV:PAGER_BOTTOM-->
+
+    <!--NAV:ARCHIVE_NAV-->
+<nav class="archive-nav"><div class="archive-nav-label">過去7日のアーカイブ</div><div class="archive-nav-links"><a href="https://everflux24.github.io/Aoaeola/archive/2026/07/02/04-00.html" class="archive-nav-link current">07/02</a><a href="https://everflux24.github.io/Aoaeola/archive/2026/07/01/20-00.html" class="archive-nav-link">07/01</a><a href="https://everflux24.github.io/Aoaeola/archive/2026/06/30/20-00.html" class="archive-nav-link">06/30</a><a href="https://everflux24.github.io/Aoaeola/archive/2026/06/29/20-00.html" class="archive-nav-link">06/29</a><a href="https://everflux24.github.io/Aoaeola/archive/2026/06/28/20-00.html" class="archive-nav-link">06/28</a><a href="https://everflux24.github.io/Aoaeola/archive/2026/06/27/20-00.html" class="archive-nav-link">06/27</a><a href="https://everflux24.github.io/Aoaeola/archive/2026/06/26/20-00.html" class="archive-nav-link">06/26</a></div></nav>
+<!--/NAV:ARCHIVE_NAV-->
+
+    <div style="text-align:center;">
+      <a href="https://everflux24.github.io/Aoaeola/" class="back-link">&#8592; トップページへ戻る</a>
+    </div>
+
+    <footer>
+      <p>Generated by Aoaeola v2.5 &#183; 2026-07-02 08:00:43</p>
+    </footer>
+  </div>
+</body>
+</html>
